@@ -206,72 +206,86 @@
   }
 
   function drawCard(g, p, x, y, st, isSpouse, uid) {
-    var color = genderColor(p);
     var sel = st.selectedId === p.personId;
     var hit = st.hits && st.hits.has(p.personId);
     var card = el("g", { "data-id": String(Number(p.personId)), "data-kind": isSpouse ? "spouse" : "main", style: "cursor:pointer" }, g);
-    // Thẻ đặc theo giới (xanh = nam, hồng = nữ) như v1; chọn/tìm thấy thì có viền nổi
+
+    // 1. Thân thẻ: Màu vàng hoàng gia quý phái #FDDF6D, viền cam sang trọng #E37A32 (hoặc viền nổi khi chọn)
+    var color = p.isHidden ? COLORS.hidden : "#FDDF6D";
+    var borderColor = sel ? "#B91C1C" : (hit ? COLORS.hit : (p.isHidden ? COLORS.hiddenBorder : "#E37A32"));
+    var borderWidth = sel || hit ? 2.5 : 1.2;
+
     var cardAttrs = {
-      x: x, y: y, width: CARD_W, height: CARD_H, rx: 2, fill: color,
-      stroke: sel ? COLORS.selected : (hit ? COLORS.hit : "none"), "stroke-width": sel || hit ? 3 : 0
+      x: x, y: y, width: CARD_W, height: CARD_H, rx: 1.5, fill: color,
+      stroke: borderColor, "stroke-width": borderWidth
     };
     if (p.isHidden && !sel && !hit) {
-      // Viền nét đứt xám cho người bị ẩn (chọn / tìm thấy thì vẫn ưu tiên viền nổi)
-      cardAttrs.stroke = COLORS.hiddenBorder;
-      cardAttrs["stroke-width"] = 1.2;
       cardAttrs["stroke-dasharray"] = "4 3";
     }
     el("rect", cardAttrs, card);
 
-    // Đã mất (kiểu v1): vệt chéo đậm ở góc dưới phải (5 giờ)
-    if (OPT.cardStyle === "v1" && p.isDied) {
-      var rx = x + CARD_W, by2 = y + CARD_H;
-      el("polygon", { points: rx + "," + (by2 - 26) + " " + rx + "," + (by2 - 13) + " " + (rx - 13) + "," + by2 + " " + (rx - 26) + "," + by2, fill: "#3a3a3a", opacity: 0.85 }, card);
-    }
+    // 2. Bốn góc hoa văn truyền thống sắc nét chuẩn mẫu
+    el("use", { href: "#card-corner", transform: "translate(" + x + "," + y + ")" }, card);
+    el("use", { href: "#card-corner", transform: "translate(" + (x + CARD_W) + "," + y + ") scale(-1, 1)" }, card);
+    el("use", { href: "#card-corner", transform: "translate(" + x + "," + (y + CARD_H) + ") scale(1, -1)" }, card);
+    el("use", { href: "#card-corner", transform: "translate(" + (x + CARD_W) + "," + (y + CARD_H) + ") scale(-1, -1)" }, card);
 
-    // Ảnh chân dung ở giữa phía trên (có thể ẩn khi xuất ảnh)
+    // 3. Khung ảnh Avatar ở giữa (tỷ lệ & vị trí chuẩn xác theo mẫu)
     var showAvatar = !OPT.hideAvatars;
     if (showAvatar) {
-      var aw = 64, ah = 66, ax = x + (CARD_W - aw) / 2, ay = y + 14;
+      var aw = 64, ah = 68, ax = x + 20, ay = y + 8;
       var url = safeUrl(p.avatarUrl || p.avatar);
       var clip = "av-" + uid + "-" + Number(p.personId);
       var cp = el("clipPath", { id: clip }, card);
-      el("rect", { x: ax, y: ay, width: aw, height: ah, rx: 2 }, cp);
-      el("rect", { x: ax, y: ay, width: aw, height: ah, rx: 2, fill: "#ffffff", opacity: 0.55 }, card);
+      el("rect", { x: ax, y: ay, width: aw, height: ah, rx: 1.5 }, cp);
+      el("rect", { x: ax, y: ay, width: aw, height: ah, rx: 1.5, fill: "#DDE2E8" }, card);
+
       if (url) {
         var img = el("image", { x: ax, y: ay, width: aw, height: ah, preserveAspectRatio: "xMidYMid slice", "clip-path": "url(#" + clip + ")" }, card);
         img.setAttribute("href", url);
       } else {
-        // Chưa có ảnh: hình người xám đơn giản (đầu + vai) như v1
-        var cx = ax + aw / 2;
-        el("circle", { cx: cx, cy: ay + 26, r: 14, fill: "#6b7280", "clip-path": "url(#" + clip + ")" }, card);
-        el("ellipse", { cx: cx, cy: ay + ah + 4, rx: 28, ry: 26, fill: "#6b7280", "clip-path": "url(#" + clip + ")" }, card);
+        // Hình đại diện người xám: đầu tròn + vai cong tự nhiên
+        el("circle", { cx: ax + 32, cy: ay + 25, r: 12, fill: "#5A626E", "clip-path": "url(#" + clip + ")" }, card);
+        el("path", {
+          d: "M " + (ax + 7) + "," + (ay + 65) + " C " + (ax + 7) + "," + (ay + 46) + " " + (ax + 17) + "," + (ay + 40) + " " + (ax + 32) + "," + (ay + 40) + " C " + (ax + 47) + "," + (ay + 40) + " " + (ax + 57) + "," + (ay + 46) + " " + (ax + 57) + "," + (ay + 65) + " Z",
+          fill: "#5A626E", "clip-path": "url(#" + clip + ")"
+        }, card);
       }
     }
 
-    // Tên căn giữa, tối đa 2 dòng theo chiều rộng thật; ngày sinh – mất bám đáy thẻ, dài quá thì tách 2 dòng
-    var textW = CARD_W - 12;
+    // 4. Tên thành viên bên dưới ảnh
+    var textW = CARD_W - 10;
     var cx2 = x + CARD_W / 2;
-    var fsName = showAvatar ? 11.5 : 13;
-    var lines = wrapName(p.fullName, textW, fsName, 700, 2);
+    var fsName = 11.5;
+    var lines = wrapName(p.fullName, textW, fsName, 600, 2);
     var parts = OPT.hideDates ? [] : dateParts(p);
     if (parts.length === 2 && textWidth(parts[0] + " " + parts[1], 9.5, 400) <= textW) { parts = [parts[0] + " " + parts[1]]; }
-    var nameTop = showAvatar ? y + 100 : y + (CARD_H - lines.length * 15 - parts.length * 12) / 2 + 12;
+    var nameTop = showAvatar ? y + 94 : y + (CARD_H - lines.length * 15 - parts.length * 12) / 2 + 12;
+
     lines.forEach(function (line, i) {
-      var t = el("text", { x: cx2, y: nameTop + i * (showAvatar ? 13 : 15), "text-anchor": "middle", "font-size": fsName, "font-weight": 700, fill: p.isDied ? COLORS.dead : COLORS.text }, card);
+      var t = el("text", { x: cx2, y: nameTop + i * 13, "text-anchor": "middle", "font-size": fsName, "font-weight": 600, fill: "#111827" }, card);
       t.textContent = line;
     });
+
+    // Năm sinh - mất (nếu có thông tin)
     parts.forEach(function (part, i) {
-      var ty = el("text", { x: cx2, y: showAvatar ? y + CARD_H - 7 - (parts.length - 1 - i) * 11.5 : nameTop + lines.length * 15 + 4 + i * 12, "text-anchor": "middle", "font-size": 9.5, fill: COLORS.muted }, card);
+      var ty = el("text", { x: cx2, y: y + CARD_H - 8 - (parts.length - 1 - i) * 11, "text-anchor": "middle", "font-size": 9.5, fill: "#78350F" }, card);
       ty.textContent = ellipsize(part, textW, 9.5, 400);
     });
 
-    // Nhãn nhỏ góc trên phải: đời thứ mấy (giống ô số nhỏ của v1)
-    var bw = 22, bh = 15;
-    var bg = el("g", {}, card);
-    el("rect", { x: x + CARD_W - bw, y: y, width: bw, height: bh, rx: 2, fill: COLORS.badge, opacity: 0.78 }, bg);
-    var gen = el("text", { x: x + CARD_W - bw / 2, y: y + 11, "text-anchor": "middle", "font-size": 10, "font-weight": 700, fill: "#ffffff" }, bg);
+    // 5. Huy hiệu Đời (Góc trên bên trái: hình tròn trắng viền xám)
+    var bg = el("g", { transform: "translate(" + (x + 11) + "," + (y + 12) + ")" }, card);
+    el("circle", { cx: 0, cy: 0, r: 9, fill: "#FFFFFF", stroke: "#888888", "stroke-width": 0.9 }, bg);
+    var gen = el("text", { x: 0, y: 3.5, "text-anchor": "middle", "font-size": 10.5, "font-weight": 700, fill: "#111827" }, bg);
     gen.textContent = String(Number(p.generationOrder));
+
+    // 6. Nút Con Mắt Xem Nhanh (Góc trên bên phải: ô trắng bo góc + icon 👁️)
+    var btnEye = el("g", { "data-action": "view-details", "data-id": String(Number(p.personId)), style: "cursor:pointer" }, card);
+    el("rect", { x: x + CARD_W - 23, y: y + 2, width: 21, height: 17, rx: 2, fill: "#FFFFFF", stroke: "#B0B5BA", "stroke-width": 0.8 }, btnEye);
+    var eyeG = el("g", { transform: "translate(" + (x + CARD_W - 23 + 3.5) + "," + (y + 2 + 3.5) + ")" }, btnEye);
+    el("path", { d: "M 1 5 C 3.5 1.5, 10.5 1.5, 13 5 C 10.5 8.5, 3.5 8.5, 1 5 Z", fill: "none", stroke: "#4A5568", "stroke-width": 1.4, "stroke-linejoin": "round" }, eyeG);
+    el("circle", { cx: 7, cy: 5, r: 2.4, fill: "#4A5568" }, eyeG);
+
     var tip = el("title", {}, card);
     tip.textContent = (p.fullName || "") + " · Đời " + Number(p.generationOrder) + (p.isHidden ? " · Ẩn trên website" : "");
     return card;
@@ -281,6 +295,17 @@
     cfg(st.model);
     var g = st.g;
     while (g.firstChild) g.removeChild(g.firstChild);
+
+    // Thêm defs chứa hoa văn góc truyền thống ôm 4 góc thẻ
+    var defs = el("defs", {}, g);
+    var corner = el("g", { id: "card-corner" }, defs);
+    el("path", {
+      d: "M -2,3 L 0,3 L 0,0 L 3,0 L 3,-2 L 6,-2 L 6,0 L 19,0 L 19,2.5 L 14,2.5 L 14,4.5 L 7,4.5 L 7,14 L 4.5,14 L 4.5,19 L 2,19 L 2,6 L 0,6 L 0,3 L -2,3 Z",
+      fill: "#E37A32"
+    }, corner);
+    el("rect", { x: 6, y: 6, width: 3.5, height: 3.5, rx: 0.5, fill: "#E37A32" }, corner);
+    el("circle", { cx: 11.5, cy: 11.5, r: 1.5, fill: "#E37A32" }, corner);
+
     var nodes = visibleNodes(st.model);
     drawDecor(st, g);
     var links = el("g", { fill: "none", stroke: COLORS.link, "stroke-width": 1.5 }, g);
