@@ -1,0 +1,51 @@
+/*
+ * Template Default - bản responsive một bộ view cho mọi thiết bị.
+ * v1 tách 2 bộ view Desktop/Mobile; ở đây dùng chung một bộ, phần khác biệt của bản Mobile v1 gom về đây.
+ * Nạp SAU desktop-all.min.css (CSS gốc của v1, giữ nguyên).
+ */
+
+/* Mobile v1 (Themes/Mobile/main.scss) */
+.logo-footer {
+    max-width: 200px;
+}
+
+@media (max-width: 991.98px) {
+    .footer-menu {
+        margin-top: 25px;
+    }
+}
+
+/* Banner header: chỉ còn banner giữa và co theo chiều rộng màn hình */
+.header-giapha .header-banner-image img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Menu: các nút cổ xếp nhiều dòng, không tràn ngang */
+@media (max-width: 767.98px) {
+    .nav-menu-giapha ul {
+        justify-content: center;
+    }
+
+    .container-giapha,
+    .container {
+        overflow-wrap: anywhere;
+    }
+}
+
+/* Nội dung bài viết/lời nói đầu do admin dán vào: ảnh, bảng, iframe không được làm vỡ bố cục */
+.entry-content img,
+.loi-noi-dau img,
+.entry-content video {
+    max-width: 100%;
+    height: auto;
+}
+
+.entry-content table {
+    max-width: 100%;
+}
+
+.entry-content iframe,
+.den-nha-tho iframe {
+    max-width: 100%;
+}

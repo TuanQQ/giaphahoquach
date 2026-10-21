@@ -1,0 +1,455 @@
+﻿<!DOCTYPE html>
+<html lang="vi" itemscope="itemscope" itemtype="http://schema.org/WebPage" data-bs-theme="light">
+
+<head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Phß║ú ─æß╗ô - Website cß╗ºa Quang Tuan Quach</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noarchive,index,follow" />
+    <meta name="googlebot" content="noarchive,index,follow" />
+    <meta name="theme-color" content="#ffffff">
+    <link rel="shortcut icon" href="/templates/default/images/cloudzone-logo.png" type="image/x-icon">
+    <link rel="canonical" href="https://demo475.giaphadaiviet.vn/pha-do" />
+
+    <meta property="og:url" content="https://demo475.giaphadaiviet.vn/pha-do">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Phß║ú ─æß╗ô - Website cß╗ºa Quang Tuan Quach">
+    <meta property="og:description" content="">
+
+    <!--Style-->
+    <link rel="stylesheet" href="/templates/default/lib/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/templates/default/lib/fontawesome5/css/all.min.css">
+    <link rel="stylesheet" href="/templates/default/css/desktop-all.min.css?v=DpskaWLyyvn02l9pmZYmFbvdyJdBs-TRtNHmXp0OIZ4" />
+    <link rel="stylesheet" href="/templates/default/css/responsive.css?v=GV6hW3J3ccFb18LxnsivGFNbJpcsigLUhy3ZkBqIPwQ" />
+    <!--Script-->
+    <script src="/templates/default/lib/jquery/jquery.min.js"></script>
+    <script src="/templates/default/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/templates/default/lib/axios/axios.min.js"></script>
+    
+
+</head>
+
+<body class="body body-giapha default">
+    
+<div class="header header-giapha">
+    <div class="container-md">
+        <div class="row">
+            <div class="col-3 text-center d-none d-md-block">
+                <img src="/templates/default/images/banner-header-left-default.png" alt="Banner Header Left" />
+            </div>
+            <div class="col-12 col-md-6 text-center">
+                <div class="header-banner">
+                    <div class="header-banner-inner">
+                        <div class="header-banner-image">
+                            <img src="/templates/default/images/banner-header-center-default.png" alt="Banner Header Center" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-3 text-center d-none d-md-block">
+                <img src="/templates/default/images/banner-header-right-default.png" alt="Banner Header Right" />
+            </div>
+        </div>
+    </div>
+
+    
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <nav class="nav-menu-giapha">
+                <ul class="d-flex flex-wrap justify-content-center">
+                        <li class="">
+                            <div class="li-center">
+                                <a href="/">Trang chß╗º</a>
+                            </div>
+                        </li>
+                        <li class="active">
+                            <div class="li-center">
+                                <a href="/pha-do">Phß║ú ─æß╗ô</a>
+                            </div>
+                        </li>
+                        <li class="">
+                            <div class="li-center">
+                                <a href="/lich-su-kien">Sß╗▒ kiß╗çn</a>
+                            </div>
+                        </li>
+                        <li class="">
+                            <div class="li-center">
+                                <a href="/album">Th╞░ viß╗çn</a>
+                            </div>
+                        </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+
+    
+    <div class="phado">
+        <div class="position-relative">
+            <div class="loading text-center" id="loading">
+                <div class="spinner-border text-secondary"></div>
+            </div>
+        </div>
+        <div class="phado-tools container" style="display: none">
+            <div class="phado-tools-inner px-0 pb-3 pt-1">
+                <div class="row justify-content-center">
+                    <div class="col-lg-6">
+                        <div class="mb-5 d-block d-md-flex justify-content-center align-items-center">
+                            <label class="form-check-label label-select-genealogytree text-shadow-w flex-shrink-1" for="select-genealogytree" style="width: 100px;">Chß╗ìn phß║ú ─æß╗ô</label>
+                            <select class="form-select form-select-sm select-genealogytree" id="select-genealogytree">
+                                    <option value="6541" selected="selected">
+                                        hß╗ì qu├ích
+                                    </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group col-12 d-flex flex-wrap justify-content-between">
+                            <div class="phado-tools-left">
+                                <div class="d-flex flex-wrap">
+                                    <div class="position-relative" style="max-width: 300px">
+                                        <div class="search-person">
+                                            <input type="text" onkeyup="findNodeByFullName(this.value)"
+                                                   data-bs-toggle="tooltip" data-bs-placement="top" title="Nhß║¡p ├¡t nhß║Ñt 3 k├╜ tß╗▒ ─æß╗â t├¼m"
+                                                   class="form-control form-control-sm" name="name" placeholder="T├¼m t├¬n" />
+                                        </div>
+                                        <div class="clear-input" id="clear-input-full-name" style="display: none" onclick="clearInput()">x</div>
+                                        <div id="results-found" class="my-1"></div>
+                                    </div>
+                                    <div class="position-relative">
+                                        <div class="user-manual text-shadow-w ms-3" onclick="userManual()">
+                                            H╞░ß╗¢ng dß║½n
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="phado-control-panel mt-3">
+                                    <div class="me-1 my-1">
+                                        <select class="select-deep">
+                                            <option selected>Giß╗¢i hß║ín hiß╗ân thß╗ï</option>
+                                        </select>
+                                    </div>
+                                    <div class="me-1 my-1">
+                                        <button class="btn btn-sm btn-relationship">Quan hß╗ç x╞░ng h├┤</button>
+                                    </div>
+                                    <div class="form-check show-line-node-spouse me-1 my-1">
+                                        <input class="form-check-input ms-0 me-1" type="checkbox" value="" id="showLineNodeSpouse">
+                                        <label class="form-check-label" for="showLineNodeSpouse" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Hiß╗ân thß╗ï ─æ╞░ß╗¥ng nß╗æi h├┤n phß╗æi ─æß║┐n con (─æß╗æi vß╗¢i th├ánh vi├¬n nhiß╗üu h├┤n phß╗æi)">
+                                            Hiß╗ân thß╗ï ─æ╞░ß╗¥ng nß╗æi h├┤n phß╗æi ─æß║┐n con
+                                        </label>
+                                    </div>
+                                    <div class="form-check hidden-node-spouses me-1 my-1">
+                                        <input class="form-check-input ms-0 me-1" type="checkbox" value="" id="hiddenNodeSpouses">
+                                        <label class="form-check-label" for="hiddenNodeSpouses">
+                                            ß║¿n h├┤n phß╗æi
+                                        </label>
+                                    </div>
+                                    <div class="form-check me-1 my-1" id="hidden-highlight-ancestor-path" style="display: none">
+                                        <label class="form-check-label">
+                                            <i class="fas fa-times-circle text-danger"></i> Tß║»t nß╗òi bß║¡t nguß╗ôn gß╗æc
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="phado-tools-right my-2 my-lg-0" style="display: none">
+                                <div class="statistic-phado">
+                                    <h6 class="title">Thß╗æng k├¬ phß║ú ─æß╗ô</h6>
+                                    <div id="statistic-members"></div>
+                                    <div id="max-depth"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="htree text-center" id="htree" style="display: none"></div>
+        <div class="right_menu" id="dlginfo">
+            <h4 class="rm_title">Bß║úng th├┤ng tin <a class="closeInf" onclick="hideInf()">x</a></h4>
+            <p class="more_info"><a href="">Xem th├┤ng tin chi tiß║┐t</a></p>
+            <p class="view_ancestors"><a href="">Nß╗òi bß║¡t nguß╗ôn gß╗æc</a></p>
+            <p class="view_laters"><a href="">Xem ─æß╗¥i sau</a></p>
+            <p class="view_root"><a href="">Trß╗ƒ vß╗ü gß╗æc</a></p>
+        </div>
+    </div>
+    <!-- Modal t╞░╞íng t├íc th├ánh vi├¬n tr├¬n c├óy phß║ú ─æß╗ô -->
+    <div class="modal fade" id="show-info" tabindex="-1" aria-labelledby="show-info-label" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="show-info-label">Th├┤ng tin</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pb-4"></div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal nhß║¡p m├ú bß║úo mß║¡t (phß║ú ─æß╗ô ri├¬ng t╞░) -->
+    <div class="modal fade" id="input-code" data-bs-backdrop="static" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="loading" style="display: none;">
+                    <div class="spinner-border text-secondary"></div>
+                    <div class="please-wait">─Éang gß╗¡i y├¬u cß║ºu. Vui l├▓ng ─æß╗úi gi├óy l├ít</div>
+                </div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Nhß║¡p m├ú bß║úo mß║¡t ─æß╗â xem phß║ú ─æß╗ô</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pb-4">
+                    <div id="notification-code" style="display: none"></div>
+                    <form id="input-code-form">
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Nhß║¡p m├ú bß║úo mß║¡t</label>
+                            <input type="password" name="code" class="form-control" id="code" placeholder="Nhß║¡p m├ú" maxlength="100" autocomplete="off" required>
+                            <input type="hidden" name="genealogy_tree_id" id="genealogy-tree-id" value="6541" />
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn-giapha">X├íc nhß║¡n</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Quan hß╗ç x╞░ng h├┤ -->
+    <div class="modal fade" id="relationship-modal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="relationshipModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="loading" style="display: none;">
+                    <div class="spinner-border text-secondary"></div>
+                    <div class="please-wait">─Éang gß╗¡i y├¬u cß║ºu. Vui l├▓ng ─æß╗úi gi├óy l├ít</div>
+                </div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="relationshipModalLabel">Quan hß╗ç x╞░ng h├┤</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="notification-relationship-modal" style="display: none"></div>
+                    <div id="result-relationship-modal"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    
+<div class="footer footer-giapha py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-2 text-center">
+                <img class="logo-footer" src="/templates/default/images/logo-gia-pha-dai-viet.png" alt="Footer Logo" />
+            </div>
+            <div class="col-lg-6">
+                <div class="heading-title-style-3">
+                    <h4 class="text-uppercase">Gia phß║ú</h4>
+                </div>
+                <div class="footer-contact">
+                    
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <ul class="footer-menu list">
+                    <li><a href="/pha-do">Phß║ú ─æß╗ô</a></li>
+                    <li><a href="/ket-noi-ban-toc-bieu">Kß║┐t nß╗æi Ban tß╗Öc biß╗âu</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-12 copy-right text-center">
+            ─É╞░ß╗úc ph├ít triß╗ân bß╗ƒi <a class="link-copy-right" href="http://giaphadaiviet.vn/" target="_blank">Gia Phß║ú ─Éß║íi Viß╗çt</a> dß╗▒a tr├¬n nß╗ün tß║úng c├┤ng nghß╗ç cß╗ºa <a class="link-copy-right" href="https://cloudzone.vn" target="_blank">Cloudzone</a>
+        </div>
+    </div>
+</div>
+
+        <div id="gpdv-tn" class="gpdv-tn" role="dialog" aria-modal="true" aria-labelledby="gpdv-tn-title" hidden
+         data-key="gpdv-trial-notice-8786" data-today="2026-10-21">
+        <div class="gpdv-tn-backdrop" data-close></div>
+        <div class="gpdv-tn-box gpdv-tn--calm">
+            <div class="gpdv-tn-head">
+                <button type="button" class="gpdv-tn-x" aria-label="─É├│ng" data-close>
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" /></svg>
+                </button>
+                <div class="gpdv-tn-kicker">Th├┤ng b├ío tß╗½ Gia Phß║ú ─Éß║íi Viß╗çt</div>
+                <h2 id="gpdv-tn-title" class="gpdv-tn-title">T├¬n miß╗ün d├╣ng thß╗¡ sß║»p hß║┐t hß║ín</h2>
+                <div class="gpdv-tn-emblem" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="26" height="26"><path d="M7 3h10M7 21h10M8 3c0 4 3 6 4 9-1 3-4 5-4 9M16 3c0 4-3 6-4 9 1 3 4 5 4 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /><path d="M10 18.5h4l-2-2.5z" fill="currentColor" /></svg>
+                </div>
+            </div>
+
+            <div class="gpdv-tn-body">
+                <div class="gpdv-tn-domain">
+                    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8" /><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z" fill="none" stroke="currentColor" stroke-width="1.6" /></svg>
+                    <span>demo475.giaphadaiviet.vn</span>
+                </div>
+
+                <div class="gpdv-tn-count">
+                    <span class="gpdv-tn-count-num">14</span>
+                    <span class="gpdv-tn-count-unit">ng├áy<br />c├▓n lß║íi</span>
+                </div>
+
+                    <div class="gpdv-tn-timeline" style="--gpdv-tn-p: 3.57%; --gpdv-tn-n: 14;"
+                         role="img" aria-label="─É├ú d├╣ng 0 tr├¬n 14 ng├áy d├╣ng thß╗¡, c├▓n 14 ng├áy, hß║ín cuß╗æi 03/11/2026">
+                        <div class="gpdv-tn-pin is-left">H├┤m nay ┬╖ 21/10</div>
+                        <div class="gpdv-tn-track">
+                            <div class="gpdv-tn-fill"></div>
+                            <span class="gpdv-tn-dot gpdv-tn-dot-start"></span>
+                            <span class="gpdv-tn-dot gpdv-tn-dot-now"></span>
+                            <span class="gpdv-tn-dot gpdv-tn-dot-end">
+                                <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor" /><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4" /></svg>
+                            </span>
+                        </div>
+                        <div class="gpdv-tn-ends">
+                            <div><span>Bß║»t ─æß║ºu d├╣ng thß╗¡</span><strong>21/10/2026</strong></div>
+                            <div class="gpdv-tn-ends-r"><span>Hß║ín cuß╗æi</span><strong>03/11/2026</strong></div>
+                        </div>
+                        <div class="gpdv-tn-meter">─É├ú d├╣ng <strong>0</strong> / 14 ng├áy d├╣ng thß╗¡</div>
+                    </div>
+
+                <div class="gpdv-tn-ornament" aria-hidden="true"><span></span><i></i><span></span></div>
+
+                <p class="gpdv-tn-text">
+                    Website d├▓ng hß╗ì ─æang d├╣ng t├¬n miß╗ün d├╣ng thß╗¡ cß╗ºa hß╗ç thß╗æng Gia Phß║ú ─Éß║íi Viß╗çt, sß╗¡ dß╗Ñng ─æ╞░ß╗úc ─æß║┐n hß║┐t ng├áy
+                    <strong>03/11/2026</strong>. Sau thß╗¥i hß║ín n├áy website sß║╜ tß║ím kho├í ΓÇö to├án bß╗Ö dß╗» liß╗çu gia phß║ú vß║½n ─æ╞░ß╗úc l╞░u giß╗» nguy├¬n vß║╣n.
+                </p>
+                <p class="gpdv-tn-text">K├¡nh mß╗¥i ng╞░ß╗¥i quß║ún trß╗ï d├▓ng hß╗ì ─æß╗òi sang <strong>t├¬n miß╗ün ri├¬ng</strong> ─æß╗â website tiß║┐p tß╗Ñc hoß║ít ─æß╗Öng.</p>
+
+                <div class="gpdv-tn-actions">
+                    <a class="gpdv-tn-btn gpdv-tn-btn-main" href="https://cp.giaphadaiviet.vn/ten-mien" target="_blank" rel="noopener">
+                        ─Éß╗òi sang t├¬n miß╗ün ri├¬ng
+                        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                    </a>
+                    <button type="button" class="gpdv-tn-btn gpdv-tn-btn-sub" data-close>─Éß╗â sau</button>
+                </div>
+                <div class="gpdv-tn-help">Cß║ºn hß╗ù trß╗ú: <a href="tel:0888880043">08 8888 0043</a> ┬╖ <a href="https://zalo.me/0965323336" target="_blank" rel="noopener">Zalo 0965 323 336</a></div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .gpdv-tn[hidden] { display: none !important; }
+        .gpdv-tn, .gpdv-tn * { box-sizing: border-box; }
+        .gpdv-tn { --gpdv-tn-red: #8b1e1e; --gpdv-tn-red-deep: #5f1212; --gpdv-tn-gold: #c9a24a; --gpdv-tn-gold-soft: #ead7a4; --gpdv-tn-paper: #fffaf0; --gpdv-tn-ink: #3b2a1f; --gpdv-tn-muted: #7a6352; --gpdv-tn-level: #b8862b; --gpdv-tn-level-soft: #f3e6c4;
+                   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2147483000; display: flex; align-items: center; justify-content: center; padding: 16px; font-family: inherit; }
+        .gpdv-tn-backdrop { position: absolute; inset: 0; background: rgba(28, 12, 6, .62); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); animation: gpdv-tn-fade .25s ease-out; }
+        .gpdv-tn-box { position: relative; width: 100%; max-width: min(500px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow-y: auto; background: var(--gpdv-tn-paper); color: var(--gpdv-tn-ink);
+                       border-radius: 16px; border: 1px solid var(--gpdv-tn-gold); box-shadow: 0 0 0 4px rgba(201, 162, 74, .25), 0 24px 60px rgba(0, 0, 0, .38); line-height: 1.6; font-size: 15px; text-align: center; animation: gpdv-tn-rise .32s cubic-bezier(.2, .8, .3, 1); }
+        .gpdv-tn--warn { --gpdv-tn-level: #c2410c; --gpdv-tn-level-soft: #fde6d3; }
+        .gpdv-tn--urgent { --gpdv-tn-level: #b91c1c; --gpdv-tn-level-soft: #fbdcdc; }
+
+        .gpdv-tn-head { position: relative; padding: 26px 48px 40px; color: var(--gpdv-tn-gold-soft); border-radius: 15px 15px 0 0;
+                        background: repeating-linear-gradient(45deg, rgba(255, 255, 255, .035) 0 8px, transparent 8px 16px), linear-gradient(180deg, var(--gpdv-tn-red) 0%, var(--gpdv-tn-red-deep) 100%); }
+        .gpdv-tn-head::before { content: ""; position: absolute; inset: 7px 7px 7px; border: 1px solid rgba(234, 215, 164, .55); border-radius: 10px; pointer-events: none;
+                                box-shadow: inset 0 0 0 3px rgba(95, 18, 18, .9), inset 0 0 0 4px rgba(234, 215, 164, .3); }
+        .gpdv-tn-x { position: absolute; top: 14px; right: 14px; z-index: 1; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 999px; border: 0; background: rgba(255, 255, 255, .1); color: var(--gpdv-tn-gold-soft); cursor: pointer; padding: 0; }
+        .gpdv-tn-x:hover { background: rgba(255, 255, 255, .22); color: #fff; }
+        .gpdv-tn-kicker { position: relative; font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--gpdv-tn-gold); }
+        .gpdv-tn-title { position: relative; margin: 6px 0 0; font-size: 22px; line-height: 1.3; font-weight: 800; color: #fff4d6; letter-spacing: .01em; }
+        .gpdv-tn-emblem { position: absolute; left: 50%; bottom: -28px; transform: translateX(-50%); width: 56px; height: 56px; border-radius: 999px; display: flex; align-items: center; justify-content: center;
+                          background: var(--gpdv-tn-paper); color: var(--gpdv-tn-red); border: 2px solid var(--gpdv-tn-gold); box-shadow: 0 0 0 4px var(--gpdv-tn-paper), 0 6px 16px rgba(95, 18, 18, .25); }
+
+        .gpdv-tn-body { padding: 40px 28px 20px; }
+        .gpdv-tn-domain { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 4px 12px; border-radius: 999px; background: #f6ecd6; border: 1px solid #e6d3a8; color: var(--gpdv-tn-red); font-weight: 700; font-size: 14px; }
+        .gpdv-tn-domain span { overflow-wrap: anywhere; }
+        .gpdv-tn-domain svg { flex: none; }
+
+        .gpdv-tn-count { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 14px 0 4px; }
+        .gpdv-tn-count-num { font-size: 46px; line-height: 1; font-weight: 800; color: var(--gpdv-tn-level); font-variant-numeric: tabular-nums; }
+        .gpdv-tn-count-unit { font-size: 12.5px; line-height: 1.25; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--gpdv-tn-muted); text-align: left; }
+
+        .gpdv-tn-timeline { position: relative; margin: 10px 4px 0; padding-top: 34px; text-align: left; }
+        .gpdv-tn-pin { position: absolute; top: 0; left: var(--gpdv-tn-p); transform: translateX(-50%); white-space: nowrap; font-size: 12px; font-weight: 700; color: #fff; background: var(--gpdv-tn-level); padding: 3px 9px; border-radius: 6px; }
+        .gpdv-tn-pin::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: var(--gpdv-tn-level); }
+        .gpdv-tn-pin.is-left { transform: translateX(-14px); }
+        .gpdv-tn-pin.is-left::after { left: 14px; }
+        .gpdv-tn-pin.is-right { transform: translateX(calc(-100% + 14px)); }
+        .gpdv-tn-pin.is-right::after { left: auto; right: 9px; margin-left: 0; }
+        .gpdv-tn-track { position: relative; height: 10px; border-radius: 999px; background-color: #efe3c9; box-shadow: inset 0 1px 2px rgba(59, 42, 31, .15);
+                         background-image: repeating-linear-gradient(to right, transparent 0, transparent calc(100% / var(--gpdv-tn-n) - 1px), rgba(255, 250, 240, .9) calc(100% / var(--gpdv-tn-n) - 1px), rgba(255, 250, 240, .9) calc(100% / var(--gpdv-tn-n))); }
+        .gpdv-tn-fill { position: absolute; left: 0; top: 0; bottom: 0; width: var(--gpdv-tn-p); border-radius: 999px; background: linear-gradient(90deg, var(--gpdv-tn-gold) 0%, var(--gpdv-tn-level) 100%); }
+        .gpdv-tn-dot { position: absolute; top: 50%; transform: translate(-50%, -50%); border-radius: 999px; }
+        .gpdv-tn-dot-start { left: 0; width: 14px; height: 14px; background: var(--gpdv-tn-gold); border: 3px solid var(--gpdv-tn-paper); box-shadow: 0 0 0 1px var(--gpdv-tn-gold); transform: translate(0, -50%); }
+        .gpdv-tn-dot-now { left: var(--gpdv-tn-p); width: 18px; height: 18px; background: #fff; border: 4px solid var(--gpdv-tn-level); box-shadow: 0 0 0 4px var(--gpdv-tn-level-soft); }
+        .gpdv-tn--urgent .gpdv-tn-dot-now { animation: gpdv-tn-pulse 1.8s ease-out infinite; }
+        .gpdv-tn-dot-end { left: auto; right: 0; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #fff4d6; background: var(--gpdv-tn-red); border: 2px solid var(--gpdv-tn-gold); transform: translate(40%, -50%); }
+        .gpdv-tn-ends { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; font-size: 12px; color: var(--gpdv-tn-muted); }
+        .gpdv-tn-ends div { display: flex; flex-direction: column; line-height: 1.35; }
+        .gpdv-tn-ends strong { font-size: 13.5px; color: var(--gpdv-tn-ink); }
+        .gpdv-tn-ends .gpdv-tn-ends-r { text-align: right; }
+        .gpdv-tn-ends .gpdv-tn-ends-r strong { color: var(--gpdv-tn-red); }
+        .gpdv-tn-meter { margin-top: 8px; text-align: center; font-size: 12.5px; color: var(--gpdv-tn-muted); }
+        .gpdv-tn-meter strong { color: var(--gpdv-tn-ink); }
+
+        .gpdv-tn-ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 16px 0 12px; }
+        .gpdv-tn-ornament span { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gpdv-tn-gold)); }
+        .gpdv-tn-ornament span:last-child { background: linear-gradient(90deg, var(--gpdv-tn-gold), transparent); }
+        .gpdv-tn-ornament i { width: 8px; height: 8px; transform: rotate(45deg); background: var(--gpdv-tn-gold); box-shadow: 0 0 0 3px var(--gpdv-tn-paper), 0 0 0 4px var(--gpdv-tn-gold); }
+
+        .gpdv-tn-text { margin: 0 0 8px; color: #4a3727; }
+        .gpdv-tn-text strong { color: var(--gpdv-tn-red); }
+        .gpdv-tn-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 14px; }
+        .gpdv-tn-btn { flex: 1 1 160px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 10px; padding: 11px 16px; font-size: 15px; font-weight: 700; font-family: inherit; line-height: 1.3; cursor: pointer; text-decoration: none !important; transition: background-color .15s, box-shadow .15s; }
+        .gpdv-tn-btn-main { flex-grow: 2; background: linear-gradient(180deg, #a12626 0%, var(--gpdv-tn-red) 100%); border: 1px solid var(--gpdv-tn-red-deep); color: #fff4d6 !important; box-shadow: inset 0 0 0 1px rgba(234, 215, 164, .45), 0 4px 12px rgba(139, 30, 30, .3); }
+        .gpdv-tn-btn-main:hover { background: linear-gradient(180deg, var(--gpdv-tn-red) 0%, var(--gpdv-tn-red-deep) 100%); }
+        .gpdv-tn-btn-main:focus-visible, .gpdv-tn-btn-sub:focus-visible, .gpdv-tn-x:focus-visible { outline: 2px solid var(--gpdv-tn-gold); outline-offset: 2px; }
+        .gpdv-tn-btn-sub { background: #fff; border: 1px solid #dcc9a6; color: #5b4636; }
+        .gpdv-tn-btn-sub:hover { background: #f8f0df; }
+        .gpdv-tn-help { font-size: 13px; color: var(--gpdv-tn-muted); border-top: 1px dashed #e4d2b0; padding-top: 12px; }
+        .gpdv-tn-help a { color: var(--gpdv-tn-red); font-weight: 600; text-decoration: none; }
+
+        @keyframes gpdv-tn-fade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes gpdv-tn-rise { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+        @keyframes gpdv-tn-pulse { 0% { box-shadow: 0 0 0 0 rgba(185, 28, 28, .45); } 70% { box-shadow: 0 0 0 9px rgba(185, 28, 28, 0); } 100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); } }
+        @media (max-width: 480px) {
+            .gpdv-tn-head { padding: 22px 44px 36px; }
+            .gpdv-tn-title { font-size: 19px; }
+            .gpdv-tn-body { padding: 38px 18px 16px; }
+            .gpdv-tn-count-num { font-size: 40px; }
+            .gpdv-tn-text { font-size: 14.5px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .gpdv-tn-backdrop, .gpdv-tn-box, .gpdv-tn--urgent .gpdv-tn-dot-now { animation: none; }
+        }
+    </style>
+    <script>
+        (function () {
+            var box = document.getElementById('gpdv-tn');
+            if (!box) { return; }
+            var key = box.getAttribute('data-key'), today = box.getAttribute('data-today');
+            var shown = null;
+            try { shown = window.localStorage.getItem(key); } catch (e) { shown = null; }
+            if (shown === today) { return; }          // ─æ├ú hiß╗çn h├┤m nay ß╗ƒ tr├¼nh duyß╗çt n├áy: kh├┤ng hiß╗çn lß║íi
+            function remember() { try { window.localStorage.setItem(key, today); } catch (e) { } }
+            function close() { box.hidden = true; remember(); document.removeEventListener('keydown', onKey); }
+            function onKey(e) { if (e.key === 'Escape') { close(); } }
+            box.querySelectorAll('[data-close]').forEach(function (el) { el.addEventListener('click', close); });
+            setTimeout(function () {
+                box.hidden = false;
+                remember();                                // ghi ngay khi hiß╗çn: chuyß╗ân trang m├á kh├┤ng bß║Ñm ─æ├│ng c┼⌐ng kh├┤ng hiß╗çn lß║íi trong ng├áy
+                document.addEventListener('keydown', onKey);
+                var main = box.querySelector('.gpdv-tn-btn-main'); if (main) { main.focus(); }
+            }, 800);
+        })();
+    </script>
+
+
+    <script src="/templates/default/js/site.js?v=4eRF8snVvF4yrdFqhydX2N9SVPWQERZT0XQVldNW-zk"></script>
+    
+        <script src="/templates/default/lib/d3/d3.v7.min.js"></script>
+        <script>
+            var treeId = 6541;
+            var lineStyle = "curve";
+        </script>
+        <script src="/templates/default/js/pubhtree.js?v=ikknJ_jL-szapeQpAZEa2HPvfg_m6MV-8ewTcv38Kko"></script>
+
+</body>
+</html>

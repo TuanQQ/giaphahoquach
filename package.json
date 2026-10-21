@@ -1,0 +1,40 @@
+{
+  "name": "giaphahoquach",
+  "version": "1.0.0",
+  "description": "Trung tâm điều hành Gia Phả Đại Việt — Dòng Họ Quách",
+  "type": "module",
+  "scripts": {
+    "dev:server": "node server.js",
+    "dev:client": "vite",
+    "dev": "concurrently -n \"API,VITE\" -c \"yellow,cyan\" \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "giapha",
+    "genealogy",
+    "ho-quach",
+    "dai-viet"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "d3": "^7.9.0",
+    "exceljs": "^4.4.0",
+    "express": "^5.3.0",
+    "lucide-react": "^1.60.0",
+    "mongodb": "^7.7.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.2",
+    "autoprefixer": "^10.6.1",
+    "concurrently": "^10.0.6",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.4"
+  }
+}

@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #fdf1e3; /* Ivory */
+    color: #333333; /* Ink */
+    font-family: 'Roboto', 'Be Vietnam Pro', system-ui, -apple-system, sans-serif;
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: 'Noto Serif', Georgia, serif;
+  }
+
+  .font-display {
+    font-family: 'Pacifico', cursive;
+  }
+}
+
+/* Gia Phả Đại Việt specific theme utility classes */
+.bg-ivory { background-color: #fdf1e3; }
+.bg-ivory-soft { background-color: #fef8f0; }
+.bg-paper { background-color: #fffaf3; }
+.text-ink { color: #333333; }
+.text-ink-soft { color: #7a6552; }
+.text-maroon-700 { color: #5f7852; }
+.bg-maroon-700 { background-color: #5f7852; }
+.border-gold-400 { border-color: #e0c088; }
+.border-gold-500 { border-color: #d4a95a; }
+.border-gold-600 { border-color: #c8963e; }
+.text-gold-700 { color: #a8802f; }
+.bg-primary-600 { background-color: #d75b2c; }
+.hover\:bg-primary-700:hover { background-color: #b94a20; }
+.text-primary-700 { color: #b94a20; }
+.border-primary-600 { border-color: #d75b2c; }
+
+/* Incense Smoke Animation */
+@keyframes incenseSmoke {
+  0% { transform: translateY(0) scaleX(1); opacity: 0.8; }
+  50% { transform: translateY(-40px) scaleX(1.8) translateX(6px); opacity: 0.5; }
+  100% { transform: translateY(-90px) scaleX(2.8) translateX(-10px); opacity: 0; }
+}
+
+.animate-smoke {
+  animation: incenseSmoke 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f6ead0;
+}
+::-webkit-scrollbar-thumb {
+  background: #c8963e;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b94a20;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white !important; }
+}
