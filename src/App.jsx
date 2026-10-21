@@ -194,7 +194,7 @@ export default function App() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#fdf1e3] p-4">
         <div className="w-14 h-14 border-4 border-[#d75b2c] border-t-transparent rounded-full animate-spin mb-4" />
         <h2 className="font-serif text-xl font-bold text-[#5f7852]">
-          Gia Phả Đại Việt — Đang Khởi Động
+          Gia Phả Quách Tộc — Đang Khởi Động
         </h2>
         <p className="text-xs text-[#7a6552] mt-1">
           Đang nạp 398 thành viên Đại Tộc Họ Quách...
@@ -259,13 +259,13 @@ export default function App() {
               <div className="flex items-center space-x-4">
                 <img 
                   src="/images/logo.png" 
-                  alt="Gia Phả Đại Việt" 
+                  alt="Gia Phả Quách Tộc" 
                   className="h-11 w-auto object-contain shrink-0" 
                 />
                 <div>
                   <div className="flex items-center space-x-2">
                     <span className="font-display text-xl text-[#d75b2c] tracking-wide">
-                      Gia Phả Đại Việt
+                      Gia Phả Quách Tộc
                     </span>
                     <span className="text-xs px-2 py-0.5 bg-[#fdf1e3] text-[#5f7852] font-semibold rounded-md border border-[#c8963e]/40">
                       Trung tâm điều hành
@@ -423,7 +423,7 @@ export default function App() {
           <footer className="bg-[#fffaf3] border-t border-[#c8963e]/40 py-4 text-center text-xs text-[#7a6552]">
             <div className="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center space-x-2">
-                <span className="font-serif font-bold text-[#5f7852]">Gia Phả Đại Việt</span>
+                <span className="font-serif font-bold text-[#5f7852]">Gia Phả Quách Tộc</span>
                 <span>—</span>
                 <span>Trung Tâm Điều Hành & Số Hóa Dòng Họ</span>
               </div>

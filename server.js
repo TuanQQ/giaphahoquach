@@ -357,8 +357,8 @@ const handleExportExcel = async (req, res) => {
     const clan = data.clan || {};
 
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'Gia Phả Đại Việt';
-    workbook.lastModifiedBy = 'Trung Tâm Điều Hành Gia Phả';
+    workbook.creator = 'Gia Phả Quách Tộc';
+    workbook.lastModifiedBy = 'Trung Tâm Điều Hành Gia Phả Quách Tộc';
     workbook.created = new Date();
     workbook.modified = new Date();
 
@@ -370,7 +370,7 @@ const handleExportExcel = async (req, res) => {
     // 1. Title Rows
     sheet.mergeCells('A1:L1');
     const titleCell = sheet.getCell('A1');
-    titleCell.value = 'GIA PHẢ ĐẠI VIỆT — TRUNG TÂM ĐIỀU HÀNH DÒNG HỌ';
+    titleCell.value = 'GIA PHẢ QUÁCH TỘC — TRUNG TÂM ĐIỀU HÀNH DÒNG HỌ';
     titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFFFF' } };
     titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD75B2C' } };
     titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -539,7 +539,7 @@ if (fs.existsSync(distPath)) {
 // Start standalone server if not on serverless
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`Gia Phả Đại Việt (Họ Quách) đang chạy tại: http://localhost:${PORT}`);
+    console.log(`Gia Phả Quách Tộc đang chạy tại: http://localhost:${PORT}`);
     console.log(`Kết nối Database: MongoDB Atlas (giaphahoquach)`);
   });
 }

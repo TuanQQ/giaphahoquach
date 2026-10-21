@@ -65,7 +65,7 @@ export default function GuestView({
                   <div className="header-banner-image">
                     <img 
                       src="/templates/default/images/banner-header-center-default.png" 
-                      alt="Hoành Phi Gia Phả Đại Việt" 
+                      alt="Hoành Phi Gia Phả Quách Tộc" 
                       className="max-h-[185px] sm:max-h-[210px] md:max-h-[235px] w-auto max-w-full object-contain drop-shadow-2xl select-none"
                     />
                   </div>
@@ -250,15 +250,15 @@ export default function GuestView({
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
             
-            {/* Logo Gia Phả Đại Việt */}
+            {/* Logo Gia Phả Quách Tộc */}
             <div className="md:col-span-3 text-center md:text-left">
               <img 
                 src="/templates/default/images/logo-gia-pha-dai-viet.png" 
-                alt="Gia Phả Đại Việt" 
+                alt="Gia Phả Quách Tộc" 
                 className="h-16 w-auto object-contain mx-auto md:mx-0 drop-shadow-md"
               />
               <p className="text-xs text-[#edd9b0] font-serif mt-1">
-                Hệ Thống Số Hóa Gia Phả Việt Nam
+                Hệ Thống Số Hóa Gia Phả Quách Tộc
               </p>
             </div>
 
@@ -291,7 +291,7 @@ export default function GuestView({
           </div>
 
           <div className="mt-4 pt-3 border-t border-[#c8963e]/30 text-center text-[11px] text-stone-400">
-            © Bản quyền thuộc về Đại Tộc Họ Quách • Phát triển trên nền tảng Gia Phả Đại Việt (Local: http://localhost:3001)
+            © Bản quyền thuộc về Đại Tộc Họ Quách • Phát triển trên nền tảng Gia Phả Quách Tộc (https://giaphahoquach.vercel.app)
           </div>
         </div>
       </footer>

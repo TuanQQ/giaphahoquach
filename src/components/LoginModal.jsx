@@ -52,7 +52,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
             </div>
             <div>
               <h3 className="font-serif text-lg font-bold">Xác Thực Quản Trị Viên</h3>
-              <p className="text-[11px] text-emerald-100">Gia Phả Đại Việt • Đại Tộc Họ Quách</p>
+              <p className="text-[11px] text-emerald-100">Gia Phả Quách Tộc • Đại Tộc Họ Quách</p>
             </div>
           </div>
           <button 
