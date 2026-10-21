@@ -57,7 +57,7 @@ async function getAuthConfig() {
       return JSON.parse(fs.readFileSync(AUTH_FILE, 'utf-8'));
     }
   } catch (e) {}
-  return { username: 'admin', password: 'admin123' };
+  return { username: 'admin', password: 'Baolong2022' };
 }
 
 async function saveAuthConfig(cfg) {
