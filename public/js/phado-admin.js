@@ -1,4 +1,4 @@
-﻿// GIA PHẢ ĐẠI VIỆT — Phả đồ tương tác ở trang quản trị (window.phadoAdmin).
+// GIA PHẢ ĐẠI VIỆT — Phả đồ tương tác ở trang quản trị (window.phadoAdmin).
 // Vẽ cây từ DANH SÁCH PHẲNG người của một phả đồ (TreePersonDto): nút = người TRONG TỘC nối nhau theo trục dọc parentId,
 // dâu/rể (isFamily=false) không đứng thành nút mà nằm cạnh bạn đời. D3 v7 chỉ dùng cho thu phóng/kéo (d3.zoom); phần còn lại là DOM SVG thuần.
 // AN TOÀN XSS: mọi chuỗi từ dữ liệu đưa vào SVG qua textContent; URL ảnh qua safeUrl(); id ép số. Không dùng innerHTML với dữ liệu.
@@ -293,7 +293,7 @@
     el("circle", { cx: 7, cy: 5, r: 2.4, fill: "#4A5568" }, eyeG);
 
     // 7. NÚT DẤU CỘNG (+) XUẤT HIỆN Ở GÓC TRÊN BÊN PHẢI KHI HOVER VÀO NGƯỜI ĐÀN ÔNG
-    var showAddChild = isMale && !st.printMode && (st.isAdmin !== false);
+    var showAddChild = isMale && !st.printMode;
     if (showAddChild) {
       var btnAddChild = el("g", {
         class: "btn-hover-add",
@@ -305,13 +305,15 @@
       // Nút tròn xanh viền trắng nổi bật
       el("circle", {
         cx: 0, cy: 0, r: 10.5,
-        fill: "#2e7d32", stroke: "#ffffff", "stroke-width": 1.8
+        fill: "#2e7d32", stroke: "#ffffff", "stroke-width": 1.8,
+        "data-add-child": String(Number(p.personId))
       }, btnAddChild);
 
       // Icon dấu cộng (+) trắng đậm nét
       el("path", {
         d: "M -5,0 L 5,0 M 0,-5 L 0,5",
-        stroke: "#ffffff", "stroke-width": 2.2, "stroke-linecap": "round"
+        stroke: "#ffffff", "stroke-width": 2.2, "stroke-linecap": "round",
+        "data-add-child": String(Number(p.personId))
       }, btnAddChild);
 
       var tipAdd = el("title", {}, btnAddChild);
@@ -335,18 +337,16 @@
       .btn-hover-add {
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-        transform: scale(0.7);
-        transform-origin: center;
+        transition: opacity 0.2s ease;
       }
       .card-male:hover .btn-hover-add,
       .btn-hover-add:hover {
         opacity: 1 !important;
         pointer-events: all !important;
-        transform: scale(1) !important;
       }
       .card-male:hover .btn-eye-icon {
         opacity: 0;
+        pointer-events: none;
         transition: opacity 0.15s ease;
       }
       .btn-hover-add:hover circle {

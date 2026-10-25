@@ -89,13 +89,13 @@ export default function DaiVietPhado({
         console.log('dotNetBridge invoked:', method, id);
         if (method === 'OnPersonClicked') {
           const rawId = 'm_' + id;
-          const found = members.find(m => m.id === rawId);
+          const found = members.find(m => m.id === rawId || String(m.id).replace('m_', '') === String(id));
           if (found) {
             onSelectMember(found);
           }
         } else if (method === 'OnAddChildClicked') {
           const rawId = 'm_' + id;
-          const father = members.find(m => m.id === rawId);
+          const father = members.find(m => m.id === rawId || String(m.id).replace('m_', '') === String(id));
           if (father && onAddMember) {
             if (onSelectMember) onSelectMember(null);
             onAddMember({

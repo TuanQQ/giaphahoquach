@@ -19,7 +19,8 @@ export default function GuestView({
   onSelectMember, 
   onOfferIncense, 
   onRequireLogin, 
-  onDownloadExcel 
+  onDownloadExcel,
+  onAddMember
 }) {
   const [activeTab, setActiveTab] = useState('phado'); // phado | home | events | tuduong
   const [librarySubTab, setLibrarySubTab] = useState('tuduong'); // tuduong | directory | stats
@@ -143,7 +144,7 @@ export default function GuestView({
               clan={clan}
               isAdmin={false}
               onSelectMember={onSelectMember}
-              onAddMember={() => onRequireLogin()}
+              onAddMember={onAddMember || (() => onRequireLogin())}
               onDownloadExcel={onDownloadExcel}
               onRequireLogin={onRequireLogin}
             />
@@ -231,7 +232,7 @@ export default function GuestView({
                 members={members}
                 isAdmin={false}
                 onSelectMember={onSelectMember}
-                onAddMember={() => onRequireLogin()}
+                onAddMember={onAddMember || (() => onRequireLogin())}
                 onDeleteMember={() => {}}
               />
             )}

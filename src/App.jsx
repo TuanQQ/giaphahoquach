@@ -251,6 +251,7 @@ export default function App() {
           onOfferIncense={handleOfferIncense}
           onRequireLogin={() => setIsLoginOpen(true)}
           onDownloadExcel={handleDownloadExcel}
+          onAddMember={handleOpenAddMember}
         />
       ) : (
         /* GIAO DIỆN 2: CHẾ ĐỘ QUẢN TRỊ VIÊN (CHUẨN CP.GIAPHADAIVIET.VN) */
