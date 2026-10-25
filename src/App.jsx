@@ -90,7 +90,7 @@ export default function App() {
     showToast('Đã chuyển sang giao diện Con Cháu / Khách (demo475.giaphadaiviet.vn)', 'info');
   };
 
-  // 3. Member CRUD Handlers (Protected)
+  // 3. Member CRUD Handlers (Protected & Optimistic UI for instant response)
   const handleSaveMember = async (memberData) => {
     if (!isAdmin) {
       setIsLoginOpen(true);
@@ -98,11 +98,16 @@ export default function App() {
       return;
     }
 
-    try {
-      const isEdit = !isNewMember && selectedMember;
-      const url = isEdit ? `/api/members/${selectedMember.id}` : '/api/members';
-      const method = isEdit ? 'PUT' : 'POST';
+    const isEdit = !isNewMember && selectedMember;
+    const url = isEdit ? `/api/members/${selectedMember.id}` : '/api/members';
+    const method = isEdit ? 'PUT' : 'POST';
 
+    // Đóng modal tức thì ngay khi nhấn lưu (0ms delay)
+    setSelectedMember(null);
+    setIsNewMember(null);
+    showToast(isEdit ? 'Đang lưu cập nhật...' : 'Đang thêm thành viên...', 'info');
+
+    try {
       const res = await fetch(url, {
         method,
         headers: { 
@@ -115,12 +120,24 @@ export default function App() {
       const resData = await res.json();
       if (!res.ok) throw new Error(resData.error || 'Lỗi khi lưu');
 
-      await loadData();
-      setSelectedMember(null);
-      setIsNewMember(null);
+      // Cập nhật trực tiếp State (không gọi loadData toàn phần gây nháy màn hình)
+      setData(prev => {
+        if (!prev) return prev;
+        const savedMember = resData.member;
+        let newMembers = [...(prev.members || [])];
+        if (isEdit) {
+          const idx = newMembers.findIndex(m => m.id === savedMember.id);
+          if (idx !== -1) newMembers[idx] = savedMember;
+        } else {
+          newMembers.push(savedMember);
+        }
+        return { ...prev, members: newMembers };
+      });
+
       showToast(isEdit ? 'Đã cập nhật thông tin thành viên thành công!' : 'Đã thêm thành viên mới vào gia phả!');
     } catch (err) {
       alert('Không thể lưu thành viên: ' + err.message);
+      loadData();
     }
   };
 
@@ -132,19 +149,30 @@ export default function App() {
     }
 
     if (!window.confirm('Bạn có chắc chắn muốn xóa thành viên này khỏi gia phả?')) return;
+
+    // Đóng modal và xóa tức thì trên giao diện (0ms delay)
+    if (selectedMember && selectedMember.id === id) {
+      setSelectedMember(null);
+    }
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        members: (prev.members || []).filter(m => m.id !== id)
+      };
+    });
+    showToast('Đang xóa thành viên...', 'info');
+
     try {
       const res = await fetch(`/api/members/${id}`, { 
         method: 'DELETE',
         headers: { 'x-admin-token': authToken }
       });
       if (!res.ok) throw new Error('Lỗi khi xóa');
-      await loadData();
-      if (selectedMember && selectedMember.id === id) {
-        setSelectedMember(null);
-      }
       showToast('Đã xóa thành viên khỏi gia phả.');
     } catch (err) {
       alert('Không thể xóa: ' + err.message);
+      loadData();
     }
   };
 

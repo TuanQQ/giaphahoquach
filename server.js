@@ -113,8 +113,13 @@ app.post('/api/auth/change-password', requireAdmin, async (req, res) => {
   res.json({ success: true, message: 'Đổi mật khẩu thành công!' });
 });
 
-// Helper read/write database (MongoDB Atlas + Fallback Local JSON)
-async function readData() {
+// Helper read/write database (MongoDB Atlas + Fallback Local JSON + In-Memory Cache)
+let memoryCache = null;
+
+async function readData(forceFresh = false) {
+  if (memoryCache && !forceFresh) {
+    return memoryCache;
+  }
   const db = await getDb();
   if (db) {
     try {
@@ -124,7 +129,8 @@ async function readData() {
       members.forEach(m => delete m._id);
       const incenseLogs = await db.collection('incenseLogs').find({}).sort({ createdAt: -1 }).toArray();
       incenseLogs.forEach(i => delete i._id);
-      return { clan: clanDoc, members, incenseLogs };
+      memoryCache = { clan: clanDoc, members, incenseLogs };
+      return memoryCache;
     } catch (e) {
       console.error('Lỗi truy vấn MongoDB Atlas, đọc từ JSON:', e.message);
     }
@@ -132,7 +138,8 @@ async function readData() {
 
   try {
     const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(raw);
+    memoryCache = JSON.parse(raw);
+    return memoryCache;
   } catch (err) {
     console.error('Lỗi khi đọc file data:', err);
     return { clan: {}, members: [], incenseLogs: [] };
@@ -140,6 +147,7 @@ async function readData() {
 }
 
 async function writeData(data) {
+  memoryCache = data;
   const db = await getDb();
   if (db) {
     try {
@@ -189,7 +197,17 @@ app.get('/api/clan', async (req, res) => {
 app.put('/api/clan', requireAdmin, async (req, res) => {
   const data = await readData();
   data.clan = { ...data.clan, ...req.body };
-  await writeData(data);
+  const db = await getDb();
+  if (db) {
+    try {
+      const copy = { ...data.clan };
+      delete copy._id;
+      await db.collection('clan').updateOne({}, { $set: copy }, { upsert: true });
+    } catch (e) {
+      console.error('Lỗi cập nhật clan MongoDB:', e.message);
+    }
+  }
+  try { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); } catch (err) {}
   res.json({ success: true, clan: data.clan });
 });
 
@@ -248,7 +266,28 @@ app.post('/api/members', requireAdmin, async (req, res) => {
     });
   }
 
-  await writeData(data);
+  // Cập nhật targeted MongoDB siêu tốc (chỉ ghi bản ghi này thay vì xóa viết lại 400 người)
+  const db = await getDb();
+  if (db) {
+    try {
+      const copy = { ...newMember };
+      delete copy._id;
+      await db.collection('members').insertOne(copy);
+      if (newMember.fatherId) {
+        await db.collection('members').updateOne({ id: newMember.fatherId }, { $addToSet: { childrenIds: newMember.id } });
+      }
+      if (newMember.motherId) {
+        await db.collection('members').updateOne({ id: newMember.motherId }, { $addToSet: { childrenIds: newMember.id } });
+      }
+      if (newMember.spouseIds && newMember.spouseIds.length > 0) {
+        await db.collection('members').updateMany({ id: { $in: newMember.spouseIds } }, { $addToSet: { spouseIds: newMember.id } });
+      }
+    } catch (e) {
+      console.error('Lỗi thêm thành viên MongoDB:', e.message);
+    }
+  }
+  try { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); } catch (err) {}
+
   res.json({ success: true, member: newMember });
 });
 
@@ -264,9 +303,12 @@ app.put('/api/members/:id', requireAdmin, async (req, res) => {
   const updatedMember = { ...oldMember, ...req.body, id: oldMember.id };
 
   // Handle spouse synchronization
+  let addedSpouses = [];
+  let removedSpouses = [];
   if (req.body.spouseIds) {
     oldMember.spouseIds.forEach(spId => {
       if (!req.body.spouseIds.includes(spId)) {
+        removedSpouses.push(spId);
         const sp = data.members.find(m => m.id === spId);
         if (sp) sp.spouseIds = sp.spouseIds.filter(id => id !== oldMember.id);
       }
@@ -274,6 +316,7 @@ app.put('/api/members/:id', requireAdmin, async (req, res) => {
     req.body.spouseIds.forEach(spId => {
       const sp = data.members.find(m => m.id === spId);
       if (sp && !sp.spouseIds.includes(oldMember.id)) {
+        addedSpouses.push(spId);
         sp.spouseIds.push(oldMember.id);
       }
     });
@@ -307,7 +350,38 @@ app.put('/api/members/:id', requireAdmin, async (req, res) => {
   }
 
   data.members[idx] = updatedMember;
-  await writeData(data);
+
+  // Cập nhật targeted MongoDB siêu tốc
+  const db = await getDb();
+  if (db) {
+    try {
+      const copy = { ...updatedMember };
+      delete copy._id;
+      await db.collection('members').updateOne({ id: req.params.id }, { $set: copy });
+      if (addedSpouses.length > 0) {
+        await db.collection('members').updateMany({ id: { $in: addedSpouses } }, { $addToSet: { spouseIds: oldMember.id } });
+      }
+      if (removedSpouses.length > 0) {
+        await db.collection('members').updateMany({ id: { $in: removedSpouses } }, { $pull: { spouseIds: oldMember.id } });
+      }
+      if (oldMember.fatherId && oldMember.fatherId !== updatedMember.fatherId) {
+        await db.collection('members').updateOne({ id: oldMember.fatherId }, { $pull: { childrenIds: oldMember.id } });
+      }
+      if (updatedMember.fatherId) {
+        await db.collection('members').updateOne({ id: updatedMember.fatherId }, { $addToSet: { childrenIds: updatedMember.id } });
+      }
+      if (oldMember.motherId && oldMember.motherId !== updatedMember.motherId) {
+        await db.collection('members').updateOne({ id: oldMember.motherId }, { $pull: { childrenIds: oldMember.id } });
+      }
+      if (updatedMember.motherId) {
+        await db.collection('members').updateOne({ id: updatedMember.motherId }, { $addToSet: { childrenIds: updatedMember.id } });
+      }
+    } catch (e) {
+      console.error('Lỗi cập nhật thành viên MongoDB:', e.message);
+    }
+  }
+  try { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); } catch (err) {}
+
   res.json({ success: true, member: updatedMember });
 });
 
@@ -329,7 +403,22 @@ app.delete('/api/members/:id', requireAdmin, async (req, res) => {
   });
 
   data.members.splice(idx, 1);
-  await writeData(data);
+
+  // Cập nhật targeted MongoDB siêu tốc
+  const db = await getDb();
+  if (db) {
+    try {
+      await db.collection('members').deleteOne({ id: idToDelete });
+      await db.collection('members').updateMany({ fatherId: idToDelete }, { $set: { fatherId: null } });
+      await db.collection('members').updateMany({ motherId: idToDelete }, { $set: { motherId: null } });
+      await db.collection('members').updateMany({ spouseIds: idToDelete }, { $pull: { spouseIds: idToDelete } });
+      await db.collection('members').updateMany({ childrenIds: idToDelete }, { $pull: { childrenIds: idToDelete } });
+    } catch (e) {
+      console.error('Lỗi xóa thành viên MongoDB:', e.message);
+    }
+  }
+  try { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); } catch (err) {}
+
   res.json({ success: true, message: 'Đã xóa thành viên khỏi phả hệ' });
 });
 
@@ -345,7 +434,19 @@ app.post('/api/incense', async (req, res) => {
   };
   if (!data.incenseLogs) data.incenseLogs = [];
   data.incenseLogs.unshift(log);
-  await writeData(data);
+  if (data.incenseLogs.length > 50) data.incenseLogs = data.incenseLogs.slice(0, 50);
+
+  const db = await getDb();
+  if (db) {
+    try {
+      const copy = { ...log };
+      delete copy._id;
+      await db.collection('incenseLogs').insertOne(copy);
+    } catch (e) {
+      console.error('Lỗi lưu dâng hương MongoDB:', e.message);
+    }
+  }
+  try { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); } catch (err) {}
   res.json({ success: true, log });
 });
 

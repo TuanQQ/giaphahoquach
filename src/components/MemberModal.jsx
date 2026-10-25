@@ -622,11 +622,7 @@ export default function MemberModal({ member, isNew, allMembers, onClose, onSave
                 {onDelete && (
                   <button
                     type="button"
-                    onClick={() => {
-                      if (confirm(`Bạn có chắc chắn muốn xóa thành viên "${formData.fullName}" khỏi gia phả?`)) {
-                        onDelete(member.id);
-                      }
-                    }}
+                    onClick={() => onDelete(member.id)}
                     className="px-3 py-2 text-xs font-bold text-red-700 hover:text-red-900 hover:bg-red-50 rounded-lg transition flex items-center gap-1"
                   >
                     <Trash2 className="w-4 h-4" />
