@@ -60,6 +60,29 @@
   background: #b94a20;
 }
 
+/* Hiệu ứng hover hiển thị dấu cộng (+) ở góc trên bên phải thẻ người đàn ông */
+.btn-hover-add {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.7);
+  transform-origin: center;
+}
+.card-male:hover .btn-hover-add,
+.btn-hover-add:hover {
+  opacity: 1 !important;
+  pointer-events: all !important;
+  transform: scale(1) !important;
+}
+.card-male:hover .btn-eye-icon {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.btn-hover-add:hover circle {
+  fill: #1b5e20 !important;
+  stroke: #ffe082 !important;
+}
+
 @media print {
   .no-print { display: none !important; }
   body { background: white !important; }

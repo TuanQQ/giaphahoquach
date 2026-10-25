@@ -206,9 +206,15 @@
   }
 
   function drawCard(g, p, x, y, st, isSpouse, uid) {
+    var isMale = p.gender === 1;
     var sel = st.selectedId === p.personId;
     var hit = st.hits && st.hits.has(p.personId);
-    var card = el("g", { "data-id": String(Number(p.personId)), "data-kind": isSpouse ? "spouse" : "main", style: "cursor:pointer" }, g);
+    var card = el("g", { 
+      "data-id": String(Number(p.personId)), 
+      "data-kind": isSpouse ? "spouse" : "main", 
+      class: isMale ? "card-person card-male" : "card-person", 
+      style: "cursor:pointer" 
+    }, g);
 
     // 1. Thân thẻ: Màu vàng hoàng gia quý phái #FDDF6D, viền cam sang trọng #E37A32 (hoặc viền nổi khi chọn)
     var color = p.isHidden ? COLORS.hidden : "#FDDF6D";
@@ -267,47 +273,11 @@
       t.textContent = line;
     });
 
-    // Năm sinh - mất (nếu có thông tin)
-    var isMale = p.gender === 1;
-    var showAddChild = isMale && !st.printMode && (st.isAdmin !== false);
-
+    // Năm sinh - mất (nếu có thông tin) - hiển thị bám đáy thẻ trang trọng
     parts.forEach(function (part, i) {
-      var dateY = showAddChild ? (y + 108 - (parts.length - 1 - i) * 10) : (y + CARD_H - 8 - (parts.length - 1 - i) * 11);
-      var ty = el("text", { x: cx2, y: dateY, "text-anchor": "middle", "font-size": 9.5, fill: "#78350F" }, card);
+      var ty = el("text", { x: cx2, y: y + CARD_H - 8 - (parts.length - 1 - i) * 11, "text-anchor": "middle", "font-size": 9.5, fill: "#78350F" }, card);
       ty.textContent = ellipsize(part, textW, 9.5, 400);
     });
-
-    // 7. Nút Dấu Cộng (+) Thêm Con cho người đàn ông (theo đúng yêu cầu của quản trị viên)
-    if (showAddChild) {
-      var btnAddChild = el("g", {
-        "data-add-child": String(Number(p.personId)),
-        style: "cursor:pointer"
-      }, card);
-
-      var btnW = 72, btnH = 20;
-      var btnX = x + (CARD_W - btnW) / 2;
-      var btnY = y + CARD_H - 26;
-
-      el("rect", {
-        x: btnX, y: btnY, width: btnW, height: btnH, rx: 10,
-        fill: "#2e7d32", stroke: "#ffffff", "stroke-width": 1.2
-      }, btnAddChild);
-
-      // Icon dấu cộng (+)
-      el("path", {
-        d: "M " + (btnX + 11) + "," + (btnY + 10) + " L " + (btnX + 19) + "," + (btnY + 10) + " M " + (btnX + 15) + "," + (btnY + 6) + " L " + (btnX + 15) + "," + (btnY + 14),
-        stroke: "#ffffff", "stroke-width": 2, "stroke-linecap": "round"
-      }, btnAddChild);
-
-      var btnText = el("text", {
-        x: btnX + 43, y: btnY + 13.5,
-        "text-anchor": "middle", "font-size": 9.5, "font-weight": 700, fill: "#ffffff"
-      }, btnAddChild);
-      btnText.textContent = "Thêm con";
-
-      var tipAdd = el("title", {}, btnAddChild);
-      tipAdd.textContent = "Bấm dấu (+) để thêm con cho " + (p.fullName || "người này") + " (Tự động gán Đời " + (Number(p.generationOrder) + 1) + ")";
-    }
 
     // 5. Huy hiệu Đời (Góc trên bên trái: hình tròn trắng viền xám)
     var bg = el("g", { transform: "translate(" + (x + 11) + "," + (y + 12) + ")" }, card);
@@ -316,11 +286,37 @@
     gen.textContent = String(Number(p.generationOrder));
 
     // 6. Nút Con Mắt Xem Nhanh (Góc trên bên phải: ô trắng bo góc + icon 👁️)
-    var btnEye = el("g", { "data-action": "view-details", "data-id": String(Number(p.personId)), style: "cursor:pointer" }, card);
+    var btnEye = el("g", { class: "btn-eye-icon", "data-action": "view-details", "data-id": String(Number(p.personId)), style: "cursor:pointer" }, card);
     el("rect", { x: x + CARD_W - 23, y: y + 2, width: 21, height: 17, rx: 2, fill: "#FFFFFF", stroke: "#B0B5BA", "stroke-width": 0.8 }, btnEye);
     var eyeG = el("g", { transform: "translate(" + (x + CARD_W - 23 + 3.5) + "," + (y + 2 + 3.5) + ")" }, btnEye);
     el("path", { d: "M 1 5 C 3.5 1.5, 10.5 1.5, 13 5 C 10.5 8.5, 3.5 8.5, 1 5 Z", fill: "none", stroke: "#4A5568", "stroke-width": 1.4, "stroke-linejoin": "round" }, eyeG);
     el("circle", { cx: 7, cy: 5, r: 2.4, fill: "#4A5568" }, eyeG);
+
+    // 7. NÚT DẤU CỘNG (+) XUẤT HIỆN Ở GÓC TRÊN BÊN PHẢI KHI HOVER VÀO NGƯỜI ĐÀN ÔNG
+    var showAddChild = isMale && !st.printMode && (st.isAdmin !== false);
+    if (showAddChild) {
+      var btnAddChild = el("g", {
+        class: "btn-hover-add",
+        "data-add-child": String(Number(p.personId)),
+        transform: "translate(" + (x + CARD_W - 12.5) + "," + (y + 10.5) + ")",
+        style: "cursor:pointer"
+      }, card);
+
+      // Nút tròn xanh viền trắng nổi bật
+      el("circle", {
+        cx: 0, cy: 0, r: 10.5,
+        fill: "#2e7d32", stroke: "#ffffff", "stroke-width": 1.8
+      }, btnAddChild);
+
+      // Icon dấu cộng (+) trắng đậm nét
+      el("path", {
+        d: "M -5,0 L 5,0 M 0,-5 L 0,5",
+        stroke: "#ffffff", "stroke-width": 2.2, "stroke-linecap": "round"
+      }, btnAddChild);
+
+      var tipAdd = el("title", {}, btnAddChild);
+      tipAdd.textContent = "Thêm con cho " + (p.fullName || "người này") + " (Tự động gán Đời " + (Number(p.generationOrder) + 1) + ")";
+    }
 
     var tip = el("title", {}, card);
     tip.textContent = (p.fullName || "") + " · Đời " + Number(p.generationOrder) + (p.isHidden ? " · Ẩn trên website" : "");
@@ -332,8 +328,32 @@
     var g = st.g;
     while (g.firstChild) g.removeChild(g.firstChild);
 
-    // Thêm defs chứa hoa văn góc truyền thống ôm 4 góc thẻ
+    // Thêm defs chứa hoa văn góc truyền thống và style hover nút (+)
     var defs = el("defs", {}, g);
+    var styleNode = el("style", {}, defs);
+    styleNode.textContent = `
+      .btn-hover-add {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transform: scale(0.7);
+        transform-origin: center;
+      }
+      .card-male:hover .btn-hover-add,
+      .btn-hover-add:hover {
+        opacity: 1 !important;
+        pointer-events: all !important;
+        transform: scale(1) !important;
+      }
+      .card-male:hover .btn-eye-icon {
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+      .btn-hover-add:hover circle {
+        fill: #1b5e20 !important;
+        stroke: #ffe082 !important;
+      }
+    `;
     var corner = el("g", { id: "card-corner" }, defs);
     el("path", {
       d: "M -2,3 L 0,3 L 0,0 L 3,0 L 3,-2 L 6,-2 L 6,0 L 19,0 L 19,2.5 L 14,2.5 L 14,4.5 L 7,4.5 L 7,14 L 4.5,14 L 4.5,19 L 2,19 L 2,6 L 0,6 L 0,3 L -2,3 Z",
