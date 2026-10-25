@@ -369,6 +369,20 @@ export default function MemberList({ members, onSelectMember, onAddMember, onDel
                         <div className="flex items-center justify-center space-x-1 opacity-80 group-hover:opacity-100">
                           {isAdmin ? (
                             <>
+                              {isMale && onAddMember && (
+                                <button
+                                  onClick={() => onAddMember({
+                                    defaultFatherId: m.id,
+                                    defaultGeneration: Number(m.generation || 1) + 1,
+                                    defaultBranch: m.branch || 'Chi Cụ Nải',
+                                    fatherName: m.fullName
+                                  })}
+                                  title={`Thêm con cho ${m.fullName} (Tự động tính Đời ${Number(m.generation || 1) + 1})`}
+                                  className="p-1 text-emerald-700 hover:text-emerald-900 hover:bg-emerald-100 rounded transition flex items-center"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </button>
+                              )}
                               <button
                                 onClick={() => onSelectMember(m)}
                                 title="Sửa thông tin"

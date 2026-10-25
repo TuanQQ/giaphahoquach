@@ -86,11 +86,24 @@ export default function DaiVietPhado({
 
     const dotNetBridge = {
       invokeMethodAsync: (method, id) => {
+        console.log('dotNetBridge invoked:', method, id);
         if (method === 'OnPersonClicked') {
           const rawId = 'm_' + id;
           const found = members.find(m => m.id === rawId);
           if (found) {
             onSelectMember(found);
+          }
+        } else if (method === 'OnAddChildClicked') {
+          const rawId = 'm_' + id;
+          const father = members.find(m => m.id === rawId);
+          if (father && onAddMember) {
+            if (onSelectMember) onSelectMember(null);
+            onAddMember({
+              defaultFatherId: father.id,
+              defaultGeneration: Number(father.generation || 1) + 1,
+              defaultBranch: father.branch || 'Chi Cụ Nải',
+              fatherName: father.fullName
+            });
           }
         }
       }
@@ -98,7 +111,8 @@ export default function DaiVietPhado({
 
     window.phadoAdmin.render(containerId, { people: filteredPeople }, dotNetBridge, {
       cardStyle: 'default',
-      expandAll: true
+      expandAll: true,
+      isAdmin: isAdmin
     });
 
     setIsReady(true);
@@ -111,7 +125,7 @@ export default function DaiVietPhado({
         window.phadoAdmin.dispose(containerId);
       }
     };
-  }, [treePeople, selectedBranch, members, onSelectMember]);
+  }, [treePeople, selectedBranch, members, onSelectMember, onAddMember, isAdmin]);
 
   // Các thao tác điều khiển
   const handleZoomIn = () => {

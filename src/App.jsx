@@ -33,6 +33,11 @@ export default function App() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [isNewMember, setIsNewMember] = useState(null);
 
+  const handleOpenAddMember = (defaults = {}) => {
+    setSelectedMember(null);
+    setIsNewMember(defaults);
+  };
+
   // Notification Toast
   const [toast, setToast] = useState(null);
 
@@ -309,7 +314,7 @@ export default function App() {
 
                 {/* Nút Thêm Người Nhanh */}
                 <button
-                  onClick={() => setIsNewMember({ defaultGeneration: 1 })}
+                  onClick={() => handleOpenAddMember({ defaultGeneration: 2 })}
                   className="flex items-center space-x-1 px-3 py-1.5 bg-[#d75b2c] hover:bg-[#b94a20] text-white text-xs font-bold rounded-lg shadow-sm transition"
                 >
                   <Plus className="w-4 h-4" />
@@ -365,7 +370,7 @@ export default function App() {
                 clan={clan}
                 isAdmin={true}
                 onSelectMember={(m) => setSelectedMember(m)}
-                onAddMember={(defaults) => setIsNewMember(defaults)}
+                onAddMember={handleOpenAddMember}
               />
             )}
 
@@ -374,7 +379,7 @@ export default function App() {
                 members={members}
                 isAdmin={true}
                 onSelectMember={(m) => setSelectedMember(m)}
-                onAddMember={(defaults) => setIsNewMember(defaults)}
+                onAddMember={handleOpenAddMember}
                 onDeleteMember={handleDeleteMember}
               />
             )}
@@ -448,6 +453,15 @@ export default function App() {
           }}
           onSave={handleSaveMember}
           onDelete={handleDeleteMember}
+          onAddChild={(father) => {
+            setSelectedMember(null);
+            setIsNewMember({
+              defaultFatherId: father.id,
+              defaultGeneration: Number(father.generation || 1) + 1,
+              defaultBranch: father.branch || 'Chi Cụ Nải',
+              fatherName: father.fullName
+            });
+          }}
         />
       )}
 

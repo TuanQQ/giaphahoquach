@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Trash2, User, Heart, Calendar, MapPin, Phone, BookOpen, AlertCircle } from 'lucide-react';
+import { X, Save, Trash2, User, Heart, Calendar, MapPin, Phone, BookOpen, AlertCircle, Plus, CheckCircle2 } from 'lucide-react';
 
-export default function MemberModal({ member, isNew, allMembers, onClose, onSave, onDelete, isAdmin = true }) {
+export default function MemberModal({ member, isNew, allMembers, onClose, onSave, onDelete, onAddChild, isAdmin = true }) {
   const [formData, setFormData] = useState({
     fullName: '',
     honorific: '',
@@ -28,7 +28,30 @@ export default function MemberModal({ member, isNew, allMembers, onClose, onSave
   const [activeTab, setActiveTab] = useState('basic');
 
   useEffect(() => {
-    if (member) {
+    if (isNew) {
+      setFormData({
+        fullName: '',
+        honorific: '',
+        alias: '',
+        gender: 'male',
+        generation: Number(isNew.defaultGeneration) || 1,
+        branch: isNew.defaultBranch || 'Chi Cụ Nải',
+        birthYear: '',
+        deathYear: '',
+        isAlive: true,
+        lunarDeathDay: '',
+        lunarDeathMonth: '',
+        burialPlace: '',
+        fatherId: isNew.defaultFatherId || '',
+        motherId: isNew.defaultMotherId || '',
+        spouseIds: [],
+        birthOrder: 1,
+        phone: '',
+        currentAddress: '',
+        biography: '',
+        avatar: ''
+      });
+    } else if (member) {
       setFormData({
         ...member,
         fatherId: member.fatherId || '',
@@ -39,16 +62,28 @@ export default function MemberModal({ member, isNew, allMembers, onClose, onSave
         birthOrder: member.birthOrder || 1,
         generation: member.generation || 1
       });
-    } else if (isNew) {
-      setFormData(prev => ({
-        ...prev,
-        generation: isNew.defaultGeneration || 1,
-        fatherId: isNew.defaultFatherId || '',
-        motherId: isNew.defaultMotherId || '',
-        branch: isNew.defaultBranch || 'Chi Cụ Nải'
-      }));
     }
   }, [member, isNew]);
+
+  const currentFather = allMembers.find(m => m.id === formData.fatherId);
+
+  // Khi chọn hoặc đổi Thân phụ (Cha): Tự động tính Đời = Đời cha + 1 và kế thừa Chi nhánh
+  const handleFatherChange = (newFatherId) => {
+    const selectedFather = allMembers.find(m => m.id === newFatherId);
+    if (selectedFather) {
+      setFormData(prev => ({
+        ...prev,
+        fatherId: newFatherId,
+        generation: Number(selectedFather.generation || 1) + 1,
+        branch: selectedFather.branch || prev.branch
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        fatherId: ''
+      }));
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,6 +91,18 @@ export default function MemberModal({ member, isNew, allMembers, onClose, onSave
       alert('Vui lòng nhập họ và tên thành viên');
       return;
     }
+
+    // Bảo vệ gia phả: Ngăn ngừa tạo nhầm Đời 1 không có cha mẹ gây đứt đoạn cây phả hệ
+    if (isNew && !formData.fatherId && !formData.motherId && Number(formData.generation) === 1) {
+      const root1 = allMembers.find(m => Number(m.generation) === 1);
+      if (root1) {
+        const confirmMsg = `CẢNH BÁO: Gia phả đã có Thuỷ Tổ Đời 1 là "${root1.fullName}".\n\nNếu bạn tạo thêm một người Đời 1 không có cha mẹ, người này sẽ không được nối vào cây phả hệ chung.\n\nBạn có chắc chắn muốn tiếp tục không?`;
+        if (!window.confirm(confirmMsg)) {
+          return;
+        }
+      }
+    }
+
     onSave({
       ...formData,
       generation: Number(formData.generation),
@@ -83,10 +130,16 @@ export default function MemberModal({ member, isNew, allMembers, onClose, onSave
             </div>
             <div>
               <h3 className="font-serif text-xl font-bold text-white">
-                {isNew ? 'Thêm Người Vào Gia Phả' : (formData.fullName || 'Hồ Sơ Thành Viên')}
+                {isNew 
+                  ? (currentFather ? `Thêm Con Cho: ${currentFather.fullName}` : 'Thêm Người Vào Gia Phả') 
+                  : (formData.fullName || 'Hồ Sơ Thành Viên')}
               </h3>
               <p className="text-xs text-emerald-100">
-                {isNew ? 'Cập nhật đời thứ, chi nhánh và thông tin thân tộc' : `Đời thứ ${formData.generation} • ${formData.branch || 'Gốc'}`}
+                {isNew 
+                  ? (currentFather 
+                      ? `Thân phụ Đời thứ ${currentFather.generation} • Tự động xếp: Đời thứ ${formData.generation} • ${formData.branch}`
+                      : 'Vui lòng chọn Thân Phụ để tự động gán thế hệ')
+                  : `Đời thứ ${formData.generation} • ${formData.branch || 'Gốc'}`}
               </p>
             </div>
           </div>
@@ -97,6 +150,30 @@ export default function MemberModal({ member, isNew, allMembers, onClose, onSave
             <X className="w-6 h-6" />
           </button>
         </div>
+
+        {/* Banner thông báo quan hệ Cha - Con */}
+        {isNew && currentFather && (
+          <div className="mx-6 mt-3 p-3 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-300 rounded-xl flex items-center justify-between shadow-2xs">
+            <div className="flex items-center space-x-2 text-xs">
+              <span className="px-2 py-0.5 bg-emerald-700 text-white rounded font-bold">Thân phụ (Cha):</span>
+              <span className="font-bold text-emerald-950 text-sm">{currentFather.fullName}</span>
+              <span className="text-emerald-800 font-medium">(Đời thứ {currentFather.generation} - {currentFather.branch || 'Gốc'})</span>
+            </div>
+            <div className="flex items-center space-x-1.5 bg-emerald-800 text-white text-xs font-bold px-3 py-1 rounded-lg">
+              <span>Đời của con:</span>
+              <span className="text-amber-200 font-extrabold text-sm">Đời thứ {formData.generation}</span>
+            </div>
+          </div>
+        )}
+
+        {isNew && !currentFather && (
+          <div className="mx-6 mt-3 p-2.5 bg-amber-50 border border-amber-300 rounded-xl flex items-start space-x-2 text-xs text-amber-900">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <span className="font-bold">Lưu ý huyết thống:</span> Chưa chọn Thân Phụ. Hãy chọn Thân Phụ ở mục "Quan Hệ Thân Tộc" hoặc bấm nút <b>"+ Thêm con"</b> trực tiếp trên thẻ của người Cha trên Phả Đồ để tự động gán thế hệ chính xác.
+            </div>
+          </div>
+        )}
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-[#e0c088] bg-[#fdf1e3] px-6">
@@ -313,11 +390,11 @@ export default function MemberModal({ member, isNew, allMembers, onClose, onSave
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1">
-                    Cha (Thân phụ)
+                    Cha (Thân phụ) {isNew && <span className="text-emerald-700 font-bold">(Khuyên dùng)</span>}
                   </label>
                   <select
                     value={formData.fatherId}
-                    onChange={e => setFormData({ ...formData, fatherId: e.target.value })}
+                    onChange={e => handleFatherChange(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:ring-2 focus:ring-[#d75b2c] bg-white text-sm"
                   >
                     <option value="">-- Chưa rõ / Thủy tổ --</option>
@@ -327,6 +404,12 @@ export default function MemberModal({ member, isNew, allMembers, onClose, onSave
                       </option>
                     ))}
                   </select>
+                  {currentFather && (
+                    <p className="mt-1 text-xs text-emerald-700 font-semibold flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Tự động gán: Đời thứ {formData.generation} (con của Đời {currentFather.generation})
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -523,19 +606,34 @@ export default function MemberModal({ member, isNew, allMembers, onClose, onSave
                 <AlertCircle className="w-4 h-4 text-[#d75b2c]" />
                 <span>Chế độ xem con cháu (Chỉ Quản Trị Viên mới có quyền sửa đổi)</span>
               </div>
-            ) : (!isNew && onDelete ? (
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm(`Bạn có chắc chắn muốn xóa thành viên "${formData.fullName}" khỏi gia phả?`)) {
-                    onDelete(member.id);
-                  }
-                }}
-                className="px-4 py-2 text-xs font-bold text-red-700 hover:text-red-900 hover:bg-red-50 rounded-lg transition flex items-center gap-1.5"
-              >
-                <Trash2 className="w-4 h-4" />
-                Xóa khỏi phả hệ
-              </button>
+            ) : (!isNew ? (
+              <div className="flex items-center space-x-2">
+                {member && member.gender === 'male' && onAddChild && (
+                  <button
+                    type="button"
+                    onClick={() => onAddChild(member)}
+                    className="px-3.5 py-2 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg shadow-sm transition flex items-center gap-1.5"
+                    title={`Thêm con cho ${member.fullName}`}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Thêm con</span>
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm(`Bạn có chắc chắn muốn xóa thành viên "${formData.fullName}" khỏi gia phả?`)) {
+                        onDelete(member.id);
+                      }
+                    }}
+                    className="px-3 py-2 text-xs font-bold text-red-700 hover:text-red-900 hover:bg-red-50 rounded-lg transition flex items-center gap-1"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Xóa</span>
+                  </button>
+                )}
+              </div>
             ) : <div></div>)}
 
             <div className="flex items-center gap-3">

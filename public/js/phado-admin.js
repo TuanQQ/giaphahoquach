@@ -268,10 +268,46 @@
     });
 
     // Năm sinh - mất (nếu có thông tin)
+    var isMale = p.gender === 1;
+    var showAddChild = isMale && !st.printMode && (st.isAdmin !== false);
+
     parts.forEach(function (part, i) {
-      var ty = el("text", { x: cx2, y: y + CARD_H - 8 - (parts.length - 1 - i) * 11, "text-anchor": "middle", "font-size": 9.5, fill: "#78350F" }, card);
+      var dateY = showAddChild ? (y + 108 - (parts.length - 1 - i) * 10) : (y + CARD_H - 8 - (parts.length - 1 - i) * 11);
+      var ty = el("text", { x: cx2, y: dateY, "text-anchor": "middle", "font-size": 9.5, fill: "#78350F" }, card);
       ty.textContent = ellipsize(part, textW, 9.5, 400);
     });
+
+    // 7. Nút Dấu Cộng (+) Thêm Con cho người đàn ông (theo đúng yêu cầu của quản trị viên)
+    if (showAddChild) {
+      var btnAddChild = el("g", {
+        "data-add-child": String(Number(p.personId)),
+        style: "cursor:pointer"
+      }, card);
+
+      var btnW = 72, btnH = 20;
+      var btnX = x + (CARD_W - btnW) / 2;
+      var btnY = y + CARD_H - 26;
+
+      el("rect", {
+        x: btnX, y: btnY, width: btnW, height: btnH, rx: 10,
+        fill: "#2e7d32", stroke: "#ffffff", "stroke-width": 1.2
+      }, btnAddChild);
+
+      // Icon dấu cộng (+)
+      el("path", {
+        d: "M " + (btnX + 11) + "," + (btnY + 10) + " L " + (btnX + 19) + "," + (btnY + 10) + " M " + (btnX + 15) + "," + (btnY + 6) + " L " + (btnX + 15) + "," + (btnY + 14),
+        stroke: "#ffffff", "stroke-width": 2, "stroke-linecap": "round"
+      }, btnAddChild);
+
+      var btnText = el("text", {
+        x: btnX + 43, y: btnY + 13.5,
+        "text-anchor": "middle", "font-size": 9.5, "font-weight": 700, fill: "#ffffff"
+      }, btnAddChild);
+      btnText.textContent = "Thêm con";
+
+      var tipAdd = el("title", {}, btnAddChild);
+      tipAdd.textContent = "Bấm dấu (+) để thêm con cho " + (p.fullName || "người này") + " (Tự động gán Đời " + (Number(p.generationOrder) + 1) + ")";
+    }
 
     // 5. Huy hiệu Đời (Góc trên bên trái: hình tròn trắng viền xám)
     var bg = el("g", { transform: "translate(" + (x + 11) + "," + (y + 12) + ")" }, card);
@@ -671,6 +707,16 @@
         svg.addEventListener("click", function (ev) {
           var node = ev.target;
           while (node && node !== svg) {
+            if (node.getAttribute && node.getAttribute("data-add-child")) {
+              var fatherId = Number(node.getAttribute("data-add-child"));
+              if (st.dotNetRef) st.dotNetRef.invokeMethodAsync("OnAddChildClicked", fatherId);
+              return;
+            }
+            if (node.getAttribute && node.getAttribute("data-action") === "view-details") {
+              var viewId = Number(node.getAttribute("data-id"));
+              if (st.dotNetRef) st.dotNetRef.invokeMethodAsync("OnPersonClicked", viewId);
+              return;
+            }
             if (node.getAttribute && node.getAttribute("data-toggle")) {
               var tn = st.model.nodes.get(Number(node.getAttribute("data-toggle")));
               if (tn) {
