@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { 
-  ZoomIn, ZoomOut, Maximize2, RotateCcw, Plus, Search, Download, 
+  ZoomIn, ZoomOut, Maximize2, RotateCcw, Search, Download, 
   Printer, ChevronDown, Filter, Users, Eye, Image as ImageIcon, FileText,
   FileSpreadsheet, LogIn
 } from 'lucide-react';
@@ -320,17 +320,6 @@ export default function DaiVietPhado({
             >
               <LogIn className="w-3.5 h-3.5 text-[#ffe168]" />
               <span>Quản Trị</span>
-            </button>
-          )}
-
-          {/* Nút Thêm Thành Viên (Chỉ dành cho Quản Trị Viên) */}
-          {isAdmin && (
-            <button
-              onClick={() => onAddMember({ defaultGeneration: 1 })}
-              className="flex items-center space-x-1 px-2.5 py-1 text-[11px] font-bold bg-[#d75b2c] hover:bg-[#b94a20] text-white rounded-md shadow-2xs transition"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Thêm Người</span>
             </button>
           )}
         </div>
