@@ -22,8 +22,7 @@
   function isRootPerson(p) {
     if (!p) return false;
     var id = Number(p.personId);
-    var gen = Number(p.generationOrder);
-    return gen === 1 || id === 77081 || id === 77082 || id === 77083;
+    return id === 77081 || id === 77082 || id === 77083;
   }
 
   function isRootNode(n) {
@@ -165,18 +164,16 @@
     return n.w;
   }
 
-  function place(n, left, depth) {
+  function place(n, left, depth, y) {
+    if (y === undefined) y = 0;
     n.x = left + n.w / 2;
-    if (depth === 0) {
-      n.y = 0;
-    } else {
-      n.y = ROOT_CARD_H + GAP_Y + (depth - 1) * (CARD_H + GAP_Y);
-    }
+    n.y = y;
     if (!isOpen(n)) return;
     var total = 0;
     n.children.forEach(function (c, i) { total += c.w + (i ? GAP_X : 0); });
     var cl = left + (n.w - total) / 2;
-    n.children.forEach(function (c) { place(c, cl, depth + 1); cl += c.w + GAP_X; });
+    var childY = y + nodeCardH(n) + GAP_Y;
+    n.children.forEach(function (c) { place(c, cl, depth + 1, childY); cl += c.w + GAP_X; });
   }
 
   function layout(model) {
@@ -184,7 +181,7 @@
     var left = 0;
     model.roots.forEach(function (r) {
       measure(r);
-      place(r, left, 0);
+      place(r, left, 0, 0);
       left += r.w + GAP_X * 2;
     });
   }
@@ -617,7 +614,10 @@
       var y1 = n.y + nodeCardH(n), ym = y1 + GAP_Y / 2;
       var d = "M" + px + "," + y1 + "V" + ym + "M" + lo + "," + ym + "H" + hi;
       n.children.forEach(function (c) { d += "M" + mainX(c) + "," + ym + "V" + c.y; });
-      el("path", { d: d }, links);
+      var isR = isRootNode(n);
+      var strokeColor = isR ? "#B45309" : COLORS.link;
+      var strokeWidth = isR ? 2.2 : 1.5;
+      el("path", { d: d, stroke: strokeColor, "stroke-width": strokeWidth }, links);
     });
     // Nút "Nối cha/mẹ ngoài tộc": thêm đường màu từ từng người vợ/chồng xuống đúng các con của người đó
     if (st.parentLinks && !OPT.hideSpouses) {
@@ -646,7 +646,7 @@
         var bx = mainX(n);
         var by = n.y + ch + 13;
         var btn = el("g", { "data-toggle": String(Number(n.p.personId)), style: "cursor:pointer" }, cards);
-        el("circle", { cx: bx, cy: by, r: 11, fill: "#fff", stroke: COLORS.link, "stroke-width": 1.5 }, btn);
+        el("circle", { cx: bx, cy: by, r: 11, fill: "#fff", stroke: isR ? "#B45309" : COLORS.link, "stroke-width": isR ? 2 : 1.5 }, btn);
         var label = el("text", { x: bx, y: by + 4, "text-anchor": "middle", "font-size": n.collapsed ? 10 : 15, "font-weight": 700, fill: COLORS.text }, btn);
         label.textContent = n.collapsed ? String(n.children.length) : "−";
       }

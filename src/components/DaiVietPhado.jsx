@@ -33,21 +33,66 @@ export default function DaiVietPhado({
 
   // Chuyển đổi dữ liệu Họ Quách sang chuẩn TreePersonDto của Gia Phả Đại Việt
   const treePeople = useMemo(() => {
+    const baCaChildIds = [77084, 77085, 77086, 77087];
+    const baHaiChildIds = [77088, 77671, 77672];
+
     return members.map(m => {
       const pid = parseInt(m.id.replace('m_', ''), 10);
       const isRoot = pid === 77081;
-      const isRootSpouse = pid === 77082 || pid === 77083;
-      const hasParent = !!(m.fatherId || m.motherId);
-      // isFamily = true nếu là người trong tộc họ Quách; false nếu là dâu/rể đứng cạnh bạn đời
-      const isFamily = isRoot ? true : (isRootSpouse ? false : hasParent);
+      const isBaCa = pid === 77082;
+      const isBaHai = pid === 77083;
+      const isBaCaChild = baCaChildIds.includes(pid);
+      const isBaHaiChild = baHaiChildIds.includes(pid);
 
-      const fid = isRootSpouse ? null : (m.fatherId ? parseInt(m.fatherId.replace('m_', ''), 10) : null);
-      const mid = isRootSpouse ? null : (m.motherId ? parseInt(m.motherId.replace('m_', ''), 10) : null);
-      const parentId = fid || mid;
-
+      let isFamily = false;
+      let parentId = null;
+      let fid = m.fatherId ? parseInt(m.fatherId.replace('m_', ''), 10) : null;
+      let mid = m.motherId ? parseInt(m.motherId.replace('m_', ''), 10) : null;
+      let orderSort = Number(m.birthOrder) || 1;
       let spIds = (m.spouseIds || []).map(id => parseInt(id.replace('m_', ''), 10)).filter(Boolean);
-      if (isRoot && spIds.length === 0) spIds = [77082, 77083];
-      if (isRootSpouse && spIds.length === 0) spIds = [77081];
+
+      if (isRoot) {
+        // Cụ Thuỷ Tổ Khảo Quách Văn Trễ (Root của cả dòng họ)
+        isFamily = true;
+        parentId = null;
+        fid = null;
+        mid = null;
+        spIds = []; // 2 Cụ Bà đứng thành 2 nhánh con trực tiếp dưới Cụ Tổ để toả xuống các con
+      } else if (isBaCa) {
+        // Bà Cả Nguyễn Thị Hơn: Nối trực tiếp từ Cụ Thuỷ Tổ, đứng nhánh bên trái
+        isFamily = true;
+        parentId = 77081;
+        fid = 77081;
+        mid = null;
+        spIds = [];
+        orderSort = 1;
+      } else if (isBaHai) {
+        // Bà Hai Nguyễn Thị Trình: Nối trực tiếp từ Cụ Thuỷ Tổ, đứng nhánh bên phải
+        isFamily = true;
+        parentId = 77081;
+        fid = 77081;
+        mid = null;
+        spIds = [];
+        orderSort = 2;
+      } else if (isBaCaChild) {
+        // 4 người con do Bà Cả sinh ra: Nối trực tiếp từ Bà Cả xuống!
+        isFamily = true;
+        parentId = 77082;
+        fid = 77081;
+        mid = 77082;
+        orderSort = baCaChildIds.indexOf(pid) + 1;
+      } else if (isBaHaiChild) {
+        // 3 người con do Bà Hai sinh ra: Nối trực tiếp từ Bà Hai xuống!
+        isFamily = true;
+        parentId = 77083;
+        fid = 77081;
+        mid = 77083;
+        orderSort = baHaiChildIds.indexOf(pid) + 1;
+      } else {
+        const hasParent = !!(m.fatherId || m.motherId);
+        isFamily = isRoot || hasParent;
+        parentId = fid || mid;
+      }
 
       return {
         personId: pid,
@@ -59,8 +104,8 @@ export default function DaiVietPhado({
         fatherId: fid,
         motherId: mid,
         spouseIds: spIds,
-        orderSort: Number(m.birthOrder) || 1,
-        generationOrder: isRoot || isRootSpouse ? 1 : (Number(m.generation) || 1),
+        orderSort: orderSort,
+        generationOrder: (isRoot || isBaCa || isBaHai) ? 1 : (Number(m.generation) || 1),
         birthText: m.birthYear ? String(m.birthYear) : '',
         deathText: m.deathYear ? String(m.deathYear) : '',
         isDied: !m.isAlive,
@@ -116,7 +161,7 @@ export default function DaiVietPhado({
 
     window.phadoAdmin.render(containerId, { people: filteredPeople }, dotNetBridge, {
       cardStyle: 'default',
-      expandAll: true,
+      expandAll: false,
       isAdmin: isAdmin
     });
 
