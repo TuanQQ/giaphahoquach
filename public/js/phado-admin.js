@@ -14,6 +14,30 @@
   var BIG_TREE = 50;    // quá ngưỡng này (số người trong tộc) thì mặc định chỉ mở 3 đời đầu
   var AUTO_DEPTH = 3;
   var MAX_SEARCH = 20;
+  // Kích thước khung Ông Tổ & 2 Bà Tổ (Lớn gấp ~4 lần diện tích, trang trọng uy nghi)
+  var ROOT_CARD_W = 208;
+  var ROOT_CARD_H = 288;
+  var ROOT_SP_GAP = 8;
+
+  function isRootPerson(p) {
+    if (!p) return false;
+    var id = Number(p.personId);
+    var gen = Number(p.generationOrder);
+    return gen === 1 || id === 77081 || id === 77082 || id === 77083;
+  }
+
+  function isRootNode(n) {
+    return n && n.p && isRootPerson(n.p);
+  }
+
+  function nodeCardW(n) {
+    return isRootNode(n) ? ROOT_CARD_W : CARD_W;
+  }
+
+  function nodeCardH(n) {
+    return isRootNode(n) ? ROOT_CARD_H : CARD_H;
+  }
+
 
   var COLORS = {
     male: "#86c9fb", female: "#fba8f3", unknown: "#e3d6ae", hidden: "#d4d4d8", hiddenBorder: "#8b8b94",
@@ -36,7 +60,7 @@
   }
   // Toạ độ trên màn hình của tâm nhóm người chính (để giữ nút vừa bấm đứng yên, cuộn tới người được chọn)
   function screenPos(n) {
-    return { x: mainX(n), y: n.y + CARD_H / 2 };
+    return { x: mainX(n), y: n.y + nodeCardH(n) / 2 };
   }
 
   function el(name, attrs, parent) {
@@ -109,7 +133,10 @@
 
   function spousesOf(n) { return OPT.hideSpouses ? [] : n.spouses; }
   // Tâm thẻ của NGƯỜI TRONG TỘC (thẻ đầu của nhóm; dâu/rể đứng bên phải). Đường nối cha/con xuất phát và kết thúc ở đây, không phải giữa cả nhóm.
-  function mainX(n) { return n.x - n.gw / 2 + CARD_W / 2; }
+  function mainX(n) {
+    var cw = nodeCardW(n);
+    return n.x - n.gw / 2 + cw / 2;
+  }
   // Cha/mẹ NGOÀI TỘC của người con c (con của người trong tộc n): người kia trong cặp cha–mẹ, phải là một bạn đời đang hiện của n
   function otherParentId(n, c) {
     var pid = n.p.personId, f = c.p.fatherId || null, m = c.p.motherId || null;
@@ -120,7 +147,12 @@
     if (m && ids.indexOf(m) >= 0) return m;
     return null;
   }
-  function groupWidth(n) { var k = spousesOf(n).length; return (1 + k) * CARD_W + k * SP_GAP; }
+  function groupWidth(n) {
+    var k = spousesOf(n).length;
+    var cw = nodeCardW(n);
+    var sg = isRootNode(n) ? ROOT_SP_GAP : SP_GAP;
+    return (1 + k) * cw + k * sg;
+  }
   function depthLimited(n) { return !!OPT.maxGen && n.p.generationOrder >= OPT.maxGen; }
   function isOpen(n) { return !n.collapsed && n.children.length > 0 && !depthLimited(n); }
 
@@ -135,7 +167,11 @@
 
   function place(n, left, depth) {
     n.x = left + n.w / 2;
-    n.y = depth * (CARD_H + GAP_Y);
+    if (depth === 0) {
+      n.y = 0;
+    } else {
+      n.y = ROOT_CARD_H + GAP_Y + (depth - 1) * (CARD_H + GAP_Y);
+    }
     if (!isOpen(n)) return;
     var total = 0;
     n.children.forEach(function (c, i) { total += c.w + (i ? GAP_X : 0); });
@@ -205,7 +241,207 @@
     return lines.map(function (line) { return ellipsize(line, maxW, size, weight); });
   }
 
+  
+  function drawRootCard(g, p, x, y, st, isSpouse, uid) {
+    var isMale = p.gender === 1;
+    var sel = st.selectedId === p.personId;
+    var hit = st.hits && st.hits.has(p.personId);
+    var w = ROOT_CARD_W; // 208
+    var h = ROOT_CARD_H; // 288
+    var pid = Number(p.personId);
+
+    var card = el("g", { 
+      "data-id": String(pid), 
+      "data-kind": isSpouse ? "spouse" : "main", 
+      class: isMale ? "card-person card-male card-root" : "card-person card-root", 
+      style: "cursor:pointer" 
+    }, g);
+
+    // 1. Nền hoàng gia trang trọng & Viền vàng cổ điển
+    var borderColor = sel ? "#B91C1C" : (hit ? COLORS.hit : "#B45309");
+    var borderWidth = sel || hit ? 3.5 : 2.8;
+
+    // Nền chính
+    el("rect", {
+      x: x, y: y, width: w, height: h, rx: 4,
+      fill: "#FEF3C7", stroke: borderColor, "stroke-width": borderWidth
+    }, card);
+
+    // Viền chỉ vàng sang trọng bên trong
+    el("rect", {
+      x: x + 4, y: y + 4, width: w - 8, height: h - 8, rx: 2.5,
+      fill: "none", stroke: "#D97706", "stroke-width": 1.2,
+      "stroke-dasharray": "8 3"
+    }, card);
+
+    // 2. Bốn góc hoa văn mạ vàng truyền thống hoàng gia cỡ lớn
+    el("use", { href: "#root-corner", transform: "translate(" + x + "," + y + ")" }, card);
+    el("use", { href: "#root-corner", transform: "translate(" + (x + w) + "," + y + ") scale(-1, 1)" }, card);
+    el("use", { href: "#root-corner", transform: "translate(" + x + "," + (y + h) + ") scale(1, -1)" }, card);
+    el("use", { href: "#root-corner", transform: "translate(" + (x + w) + "," + (y + h) + ") scale(-1, -1)" }, card);
+
+    // 3. Dải hoành phi danh hiệu hoàng gia màu đỏ son viền vàng ở trên cùng
+    var titleText = "THUỶ TỔ";
+    var subText = "Khởi Tổ Dòng Họ";
+    if (pid === 77081 || isMale) {
+      titleText = "THUỶ TỔ KHẢO";
+      subText = "Khởi Tổ Dòng Họ Quách";
+    } else if (pid === 77082 || (p.fullName && p.fullName.includes("Hơn"))) {
+      titleText = "THUỶ TỔ TỶ (BÀ CẢ)";
+      subText = "Chính Thất Cụ Thuỷ Tổ";
+    } else if (pid === 77083 || (p.fullName && p.fullName.includes("Trình"))) {
+      titleText = "THUỶ TỔ TỶ (BÀ HAI)";
+      subText = "Kế Thất Cụ Thuỷ Tổ";
+    }
+
+    var ribbonW = 156;
+    var ribbonH = 22;
+    var ribbonX = x + (w - ribbonW) / 2;
+    el("rect", {
+      x: ribbonX, y: y - 8, width: ribbonW, height: ribbonH, rx: 3,
+      fill: "#991B1B", stroke: "#D97706", "stroke-width": 1.2
+    }, card);
+    var tRibbon = el("text", {
+      x: x + w / 2, y: y + 7, "text-anchor": "middle",
+      "font-size": 11, "font-weight": 700, fill: "#FEF3C7",
+      "letter-spacing": "0.5"
+    }, card);
+    tRibbon.textContent = titleText;
+
+    // 4. Huy hiệu Đời 1 hình ấn triện tròn đỏ viền vàng ở góc trên bên trái
+    var bg = el("g", { transform: "translate(" + (x + 18) + "," + (y + 18) + ")" }, card);
+    el("circle", { cx: 0, cy: 0, r: 11, fill: "#991B1B", stroke: "#D97706", "stroke-width": 1.2 }, bg);
+    var gen = el("text", { x: 0, y: 3.5, "text-anchor": "middle", "font-size": 9, "font-weight": 700, fill: "#FFFFFF" }, bg);
+    gen.textContent = "ĐỜI 1";
+
+    // 5. Khung chân dung Avatar cỡ lớn trang trọng
+    var showAvatar = !OPT.hideAvatars;
+    var aw = 124, ah = 132, ax = x + 42, ay = y + 26;
+    var clip = "av-root-" + uid + "-" + pid;
+    var cp = el("clipPath", { id: clip }, card);
+    el("rect", { x: ax, y: ay, width: aw, height: ah, rx: 3 }, cp);
+    // Viền khung tranh màu đồng cổ
+    el("rect", { x: ax - 1.5, y: ay - 1.5, width: aw + 3, height: ah + 3, rx: 4, fill: "#B45309" }, card);
+    el("rect", { x: ax, y: ay, width: aw, height: ah, rx: 3, fill: "#E2E8F0" }, card);
+
+    var url = safeUrl(p.avatarUrl || p.avatar);
+    if (url && showAvatar) {
+      var img = el("image", {
+        x: ax, y: ay, width: aw, height: ah,
+        preserveAspectRatio: "xMidYMid slice", "clip-path": "url(#" + clip + ")"
+      }, card);
+      img.setAttribute("href", url);
+    } else {
+      // Hình bóng đại diện tổ tiên trang nghiêm
+      el("circle", { cx: ax + aw / 2, cy: ay + 46, r: 25, fill: isMale ? "#475569" : "#64748B", "clip-path": "url(#" + clip + ")" }, card);
+      el("path", {
+        d: "M " + (ax + 18) + "," + (ay + ah + 5) + " C " + (ax + 18) + "," + (ay + 85) + " " + (ax + 36) + "," + (ay + 75) + " " + (ax + aw / 2) + "," + (ay + 75) + " C " + (ax + aw - 36) + "," + (ay + 75) + " " + (ax + aw - 18) + "," + (ay + 85) + " " + (ax + aw - 18) + "," + (ay + ah + 5) + " Z",
+        fill: isMale ? "#475569" : "#64748B", "clip-path": "url(#" + clip + ")"
+      }, card);
+    }
+
+    // 6. Tên thành viên cỡ lớn, font chữ có chân uy nghi
+    var cx2 = x + w / 2;
+    var tName = el("text", {
+      x: cx2, y: y + 184, "text-anchor": "middle",
+      "font-size": 17, "font-weight": 700, "font-family": "'Noto Serif', serif",
+      fill: "#78350F"
+    }, card);
+    tName.textContent = p.fullName || "";
+
+    // Danh xưng phụ / vai vế
+    var tSub = el("text", {
+      x: cx2, y: y + 202, "text-anchor": "middle",
+      "font-size": 11.5, "font-weight": 600, fill: "#92400E"
+    }, card);
+    tSub.textContent = subText;
+
+    // Đường chỉ kẻ phân cách hoa văn
+    el("path", {
+      d: "M " + (x + 36) + "," + (y + 211) + " L " + (x + w - 36) + "," + (y + 211),
+      stroke: "#D97706", "stroke-width": 0.8, "stroke-dasharray": "4 2"
+    }, card);
+
+    // 7. Năm sinh - năm mất
+    var birth = p.birthText || (p.birthYear ? String(p.birthYear) : "");
+    var death = p.deathText || (p.deathYear ? String(p.deathYear) : "");
+    var yearText = "";
+    if (birth && death) yearText = "Sinh: " + birth + "  ·  Mất: " + death;
+    else if (death) yearText = "Năm mất: " + death;
+    else if (birth) yearText = "Năm sinh: " + birth;
+    else yearText = "Hậu duệ đời thứ nhất";
+
+    var tYears = el("text", {
+      x: cx2, y: y + 228, "text-anchor": "middle",
+      "font-size": 11, "font-weight": 500, fill: "#78350F"
+    }, card);
+    tYears.textContent = yearText;
+
+    // Ngày giỗ / Chi
+    var noteText = "";
+    if (pid === 77081 || isMale) {
+      noteText = "Ngày giỗ: 07/02 (Âm lịch)";
+    } else if (pid === 77082 || (p.fullName && p.fullName.includes("Hơn"))) {
+      noteText = "Mẹ sinh ra Chi Cả Nôi";
+    } else if (pid === 77083 || (p.fullName && p.fullName.includes("Trình"))) {
+      noteText = "Mẹ sinh ra Chi Cụ Trực, Nhu";
+    }
+    var tNote = el("text", {
+      x: cx2, y: y + 246, "text-anchor": "middle",
+      "font-size": 11, "font-weight": 600, fill: "#991B1B"
+    }, card);
+    tNote.textContent = noteText;
+
+    // Mộ phần
+    var burial = (p.address && p.address !== "Họ Quách") ? p.address : "Nghĩa trang dòng họ Quách";
+    var tBurial = el("text", {
+      x: cx2, y: y + 264, "text-anchor": "middle",
+      "font-size": 10.5, fill: "#4B5563"
+    }, card);
+    tBurial.textContent = burial;
+
+    // 8. Nút Con Mắt Xem Nhanh
+    var btnEye = el("g", { class: "btn-eye-icon", "data-action": "view-details", "data-id": String(pid), style: "cursor:pointer" }, card);
+    el("rect", { x: x + w - 28, y: y + 4, width: 24, height: 20, rx: 3, fill: "#FFFFFF", stroke: "#B45309", "stroke-width": 1 }, btnEye);
+    var eyeG = el("g", { transform: "translate(" + (x + w - 28 + 4.5) + "," + (y + 4 + 4) + ")" }, btnEye);
+    el("path", { d: "M 1 6 C 4 2, 11 2, 15 6 C 11 10, 4 10, 1 6 Z", fill: "none", stroke: "#78350F", "stroke-width": 1.5, "stroke-linejoin": "round" }, eyeG);
+    el("circle", { cx: 8, cy: 6, r: 2.7, fill: "#78350F" }, eyeG);
+
+    // 9. Nút Dấu Cộng (+) khi Hover (cho cụ Ông)
+    var showAddChild = isMale && !st.printMode;
+    if (showAddChild) {
+      var btnAddChild = el("g", {
+        class: "btn-hover-add",
+        "data-add-child": String(pid),
+        transform: "translate(" + (x + w - 16) + "," + (y + 14) + ")",
+        style: "cursor:pointer"
+      }, card);
+
+      el("circle", {
+        cx: 0, cy: 0, r: 13,
+        fill: "#2e7d32", stroke: "#ffffff", "stroke-width": 2,
+        "data-add-child": String(pid)
+      }, btnAddChild);
+
+      el("path", {
+        d: "M -6,0 L 6,0 M 0,-6 L 0,6",
+        stroke: "#ffffff", "stroke-width": 2.6, "stroke-linecap": "round",
+        "data-add-child": String(pid)
+      }, btnAddChild);
+
+      var tipAdd = el("title", {}, btnAddChild);
+      tipAdd.textContent = "Thêm con cho " + (p.fullName || "Cụ Thuỷ Tổ") + " (Tự động gán Đời 2)";
+    }
+
+    var tip = el("title", {}, card);
+    tip.textContent = (p.fullName || "") + " · " + titleText + " · Đời 1";
+    return card;
+  }
+
   function drawCard(g, p, x, y, st, isSpouse, uid) {
+    if (isRootPerson(p)) {
+      return drawRootCard(g, p, x, y, st, isSpouse, uid);
+    }
     var isMale = p.gender === 1;
     var sel = st.selectedId === p.personId;
     var hit = st.hits && st.hits.has(p.personId);
@@ -354,6 +590,13 @@
         stroke: #ffe082 !important;
       }
     `;
+    
+    var rCorner = el("g", { id: "root-corner" }, defs);
+    el("path", { d: "M 0,0 L 28,0 L 28,4 L 10,4 L 10,10 L 4,10 L 4,28 L 0,28 Z", fill: "#B45309" }, rCorner);
+    el("path", { d: "M 4,4 L 24,4 L 24,6 L 8,6 L 8,8 L 6,8 L 6,24 L 4,24 Z", fill: "#F59E0B" }, rCorner);
+    el("rect", { x: 10, y: 10, width: 6, height: 6, rx: 1, fill: "#B45309" }, rCorner);
+    el("circle", { cx: 18, cy: 18, r: 2.5, fill: "#D97706" }, rCorner);
+
     var corner = el("g", { id: "card-corner" }, defs);
     el("path", {
       d: "M -2,3 L 0,3 L 0,0 L 3,0 L 3,-2 L 6,-2 L 6,0 L 19,0 L 19,2.5 L 14,2.5 L 14,4.5 L 7,4.5 L 7,14 L 4.5,14 L 4.5,19 L 2,19 L 2,6 L 0,6 L 0,3 L -2,3 Z",
@@ -371,7 +614,7 @@
       var px = mainX(n);
       var cs = n.children.map(mainX);
       var lo = Math.min.apply(null, cs.concat([px])), hi = Math.max.apply(null, cs.concat([px]));
-      var y1 = n.y + CARD_H, ym = y1 + GAP_Y / 2;
+      var y1 = n.y + nodeCardH(n), ym = y1 + GAP_Y / 2;
       var d = "M" + px + "," + y1 + "V" + ym + "M" + lo + "," + ym + "H" + hi;
       n.children.forEach(function (c) { d += "M" + mainX(c) + "," + ym + "V" + c.y; });
       el("path", { d: d }, links);
@@ -385,8 +628,13 @@
     var uid = ++st.uid;
     nodes.forEach(function (n) {
       var start = n.x - n.gw / 2;
+      var isR = isRootNode(n);
+      var cw = isR ? ROOT_CARD_W : CARD_W;
+      var ch = isR ? ROOT_CARD_H : CARD_H;
+      var sg = isR ? ROOT_SP_GAP : SP_GAP;
+
       function cardAt(i) {
-        return { x: start + i * (CARD_W + SP_GAP), y: n.y };
+        return { x: start + i * (cw + sg), y: n.y };
       }
       var c0 = cardAt(0);
       drawCard(cards, n.p, c0.x, c0.y, st, false, uid);
@@ -396,7 +644,7 @@
       });
       if (n.children.length > 0 && !depthLimited(n)) {
         var bx = mainX(n);
-        var by = n.y + CARD_H + 13;
+        var by = n.y + ch + 13;
         var btn = el("g", { "data-toggle": String(Number(n.p.personId)), style: "cursor:pointer" }, cards);
         el("circle", { cx: bx, cy: by, r: 11, fill: "#fff", stroke: COLORS.link, "stroke-width": 1.5 }, btn);
         var label = el("text", { x: bx, y: by + 4, "text-anchor": "middle", "font-size": n.collapsed ? 10 : 15, "font-weight": 700, fill: COLORS.text }, btn);
@@ -422,13 +670,15 @@
     });
     var idxs = Object.keys(byIndex).map(Number).sort(function (a, b) { return a - b; });
     if (idxs.length === 0) return;
-    var y1 = n.y + CARD_H;
+    var y1 = n.y + nodeCardH(n);
     var start = n.x - n.gw / 2;
+    var cw = nodeCardW(n);
+    var sg = isRootNode(n) ? ROOT_SP_GAP : SP_GAP;
     var step = Math.min(6, 16 / idxs.length);
     idxs.forEach(function (idx, order) {
       var kids = byIndex[idx];
       var color = SPOUSE_LINKS[idx % SPOUSE_LINKS.length];
-      var sx = start + (idx + 1) * (CARD_W + SP_GAP) + CARD_W / 2;
+      var sx = start + (idx + 1) * (cw + sg) + cw / 2;
       var yl = y1 + GAP_Y / 2 + 8 + order * step;
       var off = Math.min(24, 6 * (order + 1));
       var xs = kids.map(function (c) { return mainX(c) + off; });
@@ -451,7 +701,7 @@
     nodes.forEach(function (n) {
       minC = Math.min(minC, n.x - n.gw / 2);
       maxC = Math.max(maxC, n.x + n.gw / 2);
-      maxD = Math.max(maxD, n.y + CARD_H + 30);
+      maxD = Math.max(maxD, n.y + nodeCardH(n) + 30);
     });
     return { x: minC - 20, y: -20, w: maxC - minC + 40, h: maxD + 40 };
   }

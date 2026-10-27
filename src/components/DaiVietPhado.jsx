@@ -35,16 +35,19 @@ export default function DaiVietPhado({
   const treePeople = useMemo(() => {
     return members.map(m => {
       const pid = parseInt(m.id.replace('m_', ''), 10);
-      const isRoot = m.id === 'm_77081';
+      const isRoot = pid === 77081;
+      const isRootSpouse = pid === 77082 || pid === 77083;
       const hasParent = !!(m.fatherId || m.motherId);
       // isFamily = true nếu là người trong tộc họ Quách; false nếu là dâu/rể đứng cạnh bạn đời
-      const isFamily = isRoot || hasParent;
+      const isFamily = isRoot ? true : (isRootSpouse ? false : hasParent);
 
-      const fid = m.fatherId ? parseInt(m.fatherId.replace('m_', ''), 10) : null;
-      const mid = m.motherId ? parseInt(m.motherId.replace('m_', ''), 10) : null;
+      const fid = isRootSpouse ? null : (m.fatherId ? parseInt(m.fatherId.replace('m_', ''), 10) : null);
+      const mid = isRootSpouse ? null : (m.motherId ? parseInt(m.motherId.replace('m_', ''), 10) : null);
       const parentId = fid || mid;
 
-      const spIds = (m.spouseIds || []).map(id => parseInt(id.replace('m_', ''), 10)).filter(Boolean);
+      let spIds = (m.spouseIds || []).map(id => parseInt(id.replace('m_', ''), 10)).filter(Boolean);
+      if (isRoot && spIds.length === 0) spIds = [77082, 77083];
+      if (isRootSpouse && spIds.length === 0) spIds = [77081];
 
       return {
         personId: pid,
@@ -57,7 +60,7 @@ export default function DaiVietPhado({
         motherId: mid,
         spouseIds: spIds,
         orderSort: Number(m.birthOrder) || 1,
-        generationOrder: Number(m.generation) || 1,
+        generationOrder: isRoot || isRootSpouse ? 1 : (Number(m.generation) || 1),
         birthText: m.birthYear ? String(m.birthYear) : '',
         deathText: m.deathYear ? String(m.deathYear) : '',
         isDied: !m.isAlive,
@@ -80,7 +83,9 @@ export default function DaiVietPhado({
       filteredPeople = treePeople.filter(p => 
         p.branchName === selectedBranch || 
         p.generationOrder <= 2 || 
-        p.personId === 77081
+        p.personId === 77081 ||
+        p.personId === 77082 ||
+        p.personId === 77083
       );
     }
 
