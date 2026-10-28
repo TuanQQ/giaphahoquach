@@ -133,6 +133,7 @@
   function spousesOf(n) { return OPT.hideSpouses ? [] : n.spouses; }
   // Tâm thẻ của NGƯỜI TRONG TỘC (thẻ đầu của nhóm; dâu/rể đứng bên phải). Đường nối cha/con xuất phát và kết thúc ở đây, không phải giữa cả nhóm.
   function mainX(n) {
+    if (isRootNode(n)) return n.x;
     var cw = nodeCardW(n);
     return n.x - n.gw / 2 + cw / 2;
   }
@@ -176,15 +177,7 @@
     n.children.forEach(function (c) { place(c, cl, depth + 1, childY); cl += c.w + GAP_X; });
 
     // Căn 2 Cụ Bà Tổ đứng gần nhau ở trung tâm dưới Cụ Thuỷ Tổ thay vì dạt ra 2 biên
-    if (n.p && n.p.personId === 77081 && n.children.length === 2) {
-      var baCaNode = n.children[0];
-      var baHaiNode = n.children[1];
-      var centerX = mainX(n);
-      var rootW = ROOT_CARD_W; // 208
-      var halfGap = 20;
-      baCaNode.x = centerX - rootW / 2 - halfGap;
-      baHaiNode.x = centerX + rootW / 2 + halfGap;
-    }
+    // Root placement standard
   }
 
   function layout(model) {
@@ -618,17 +611,101 @@
     var links = el("g", { fill: "none", stroke: COLORS.link, "stroke-width": 1.5 }, g);
     nodes.forEach(function (n) {
       if (!isOpen(n)) return;
-      // Từ người trong tộc (thẻ đầu của nhóm) xuống người con trong tộc — không căn giữa cả nhóm có dâu/rể
-      var px = mainX(n);
-      var cs = n.children.map(mainX);
-      var lo = Math.min.apply(null, cs.concat([px])), hi = Math.max.apply(null, cs.concat([px]));
-      var y1 = n.y + nodeCardH(n), ym = y1 + GAP_Y / 2;
-      var d = "M" + px + "," + y1 + "V" + ym + "M" + lo + "," + ym + "H" + hi;
-      n.children.forEach(function (c) { d += "M" + mainX(c) + "," + ym + "V" + c.y; });
-      var isR = isRootNode(n);
-      var strokeColor = isR ? "#B45309" : COLORS.link;
-      var strokeWidth = isR ? 2.2 : 1.5;
-      el("path", { d: d, stroke: strokeColor, "stroke-width": strokeWidth }, links);
+      if (isRootNode(n)) {
+        // --- VẼ KẾT NỐI ĐẶC BIỆT CỦA CỤ THUỶ TỔ VÀ 2 CỤ BÀ TỔ ---
+        var isR = true;
+        var start = n.x - n.gw / 2;
+        var cw = ROOT_CARD_W; // 208
+        var sg = ROOT_SP_GAP;  // 8
+        var y1 = n.y + ROOT_CARD_H; // 288
+        var ym = y1 + GAP_Y / 2;    // 312
+
+        var xBaCa = start + cw / 2;                  // start + 104
+        var xOngTo = start + (cw + sg) + cw / 2;     // start + 320
+        var xBaHai = start + 2 * (cw + sg) + cw / 2; // start + 536
+
+        // 1. Đường nối hôn phối giữa Ông Tổ và Bà Cả, Bà Hai (ngang thân thẻ y = 144)
+        var yMarriage = n.y + ROOT_CARD_H / 2;
+        el("line", {
+          x1: start + cw, y1: yMarriage,
+          x2: start + (cw + sg), y2: yMarriage,
+          stroke: "#B45309", "stroke-width": 3, "stroke-linecap": "round"
+        }, links);
+        el("line", {
+          x1: start + 2 * cw + sg, y1: yMarriage,
+          x2: start + 2 * (cw + sg), y2: yMarriage,
+          stroke: "#EA580C", "stroke-width": 3, "stroke-linecap": "round"
+        }, links);
+
+        el("circle", { cx: start + cw + sg / 2, cy: yMarriage, r: 4.5, fill: "#B45309", stroke: "#FEF3C7", "stroke-width": 1.5 }, links);
+        el("circle", { cx: start + 2 * cw + sg * 1.5, cy: yMarriage, r: 4.5, fill: "#EA580C", stroke: "#FEF3C7", "stroke-width": 1.5 }, links);
+
+        // 2. Nhánh từ Bà Cả xuống 4 người con do Bà Cả sinh ra
+        var baCaKids = n.children.filter(function (c) {
+          var oid = otherParentId(n, c);
+          return oid === 77082 || [77084, 77085, 77086, 77087].indexOf(Number(c.p.personId)) >= 0;
+        });
+        if (baCaKids.length > 0) {
+          var csCa = baCaKids.map(mainX);
+          var loCa = Math.min.apply(null, csCa.concat([xBaCa]));
+          var hiCa = Math.max.apply(null, csCa.concat([xBaCa]));
+          var dCa = "M" + xBaCa + "," + y1 + "V" + ym + "M" + loCa + "," + ym + "H" + hiCa;
+          baCaKids.forEach(function (c) { dCa += "M" + mainX(c) + "," + ym + "V" + c.y; });
+          var pathCa = el("path", { d: dCa, stroke: "#B45309", "stroke-width": 2.2 }, links);
+          var tipCa = el("title", {}, pathCa);
+          tipCa.textContent = "Bà Cả Nguyễn Thị Hơn — 4 người con (Chi Cả Nôi, Chi Kiến, Chi Thấu, Cụ Chi)";
+          
+          el("circle", { cx: xBaCa, cy: y1, r: 4, fill: "#B45309", stroke: "#FFFFFF", "stroke-width": 1.5 }, links);
+
+          var labelCaX = (loCa + hiCa) / 2;
+          var gPinCa = el("g", { transform: "translate(" + labelCaX + "," + (ym - 1) + ")" }, links);
+          el("rect", { x: -48, y: -9, width: 96, height: 16, rx: 8, fill: "#FEF3C7", stroke: "#B45309", "stroke-width": 1.2 }, gPinCa);
+          var tCa = el("text", { x: 0, y: 3, "text-anchor": "middle", "font-size": 9.5, "font-weight": 700, fill: "#92400E" }, gPinCa);
+          tCa.textContent = "Bà Cả (4 con)";
+        }
+
+        // 3. Nhánh từ Bà Hai xuống 3 người con do Bà Hai sinh ra
+        var baHaiKids = n.children.filter(function (c) {
+          var oid = otherParentId(n, c);
+          return oid === 77083 || [77088, 77671, 77672].indexOf(Number(c.p.personId)) >= 0;
+        });
+        if (baHaiKids.length > 0) {
+          var csHai = baHaiKids.map(mainX);
+          var loHai = Math.min.apply(null, csHai.concat([xBaHai]));
+          var hiHai = Math.max.apply(null, csHai.concat([xBaHai]));
+          var dHai = "M" + xBaHai + "," + y1 + "V" + ym + "M" + loHai + "," + ym + "H" + hiHai;
+          baHaiKids.forEach(function (c) { dHai += "M" + mainX(c) + "," + ym + "V" + c.y; });
+          var pathHai = el("path", { d: dHai, stroke: "#EA580C", "stroke-width": 2.2 }, links);
+          var tipHai = el("title", {}, pathHai);
+          tipHai.textContent = "Bà Hai Nguyễn Thị Trình — 3 người con (Chi Trực, Cụ Tư, Chi Nhu)";
+
+          el("circle", { cx: xBaHai, cy: y1, r: 4, fill: "#EA580C", stroke: "#FFFFFF", "stroke-width": 1.5 }, links);
+
+          var labelHaiX = (loHai + hiHai) / 2;
+          var gPinHai = el("g", { transform: "translate(" + labelHaiX + "," + (ym - 1) + ")" }, links);
+          el("rect", { x: -48, y: -9, width: 96, height: 16, rx: 8, fill: "#FFEDD5", stroke: "#EA580C", "stroke-width": 1.2 }, gPinHai);
+          var tHai = el("text", { x: 0, y: 3, "text-anchor": "middle", "font-size": 9.5, "font-weight": 700, fill: "#C2410C" }, gPinHai);
+          tHai.textContent = "Bà Hai (3 con)";
+        }
+
+        // 4. Đường nối từ chân Cụ Thuỷ Tổ xuống nút thu gọn [-]
+        el("line", {
+          x1: xOngTo, y1: y1,
+          x2: xOngTo, y2: y1 + 13,
+          stroke: "#B45309", "stroke-width": 2
+        }, links);
+
+      } else {
+        var px = mainX(n);
+        var cs = n.children.map(mainX);
+        var lo = Math.min.apply(null, cs.concat([px])), hi = Math.max.apply(null, cs.concat([px]));
+        var y1 = n.y + nodeCardH(n), ym = y1 + GAP_Y / 2;
+        var d = "M" + px + "," + y1 + "V" + ym + "M" + lo + "," + ym + "H" + hi;
+        n.children.forEach(function (c) { d += "M" + mainX(c) + "," + ym + "V" + c.y; });
+        var strokeColor = COLORS.link;
+        var strokeWidth = 1.5;
+        el("path", { d: d, stroke: strokeColor, "stroke-width": strokeWidth }, links);
+      }
     });
     // Nút "Nối cha/mẹ ngoài tộc": thêm đường màu từ từng người vợ/chồng xuống đúng các con của người đó
     if (st.parentLinks && !OPT.hideSpouses) {
@@ -647,12 +724,24 @@
       function cardAt(i) {
         return { x: start + i * (cw + sg), y: n.y };
       }
-      var c0 = cardAt(0);
-      drawCard(cards, n.p, c0.x, c0.y, st, false, uid);
-      spousesOf(n).forEach(function (sp, i) {
-        var ci = cardAt(i + 1);
-        drawCard(cards, sp, ci.x, ci.y, st, true, uid);
-      });
+      if (isR && spousesOf(n).length >= 2) {
+        // Thứ tự truyền thống trang trọng: Bà Cả (Tả) — Cụ Thuỷ Tổ (Trung tâm) — Bà Hai (Hữu)
+        var sp0 = spousesOf(n)[0]; // Bà Cả Nguyễn Thị Hơn
+        var sp1 = spousesOf(n)[1]; // Bà Hai Nguyễn Thị Trình
+        var cLeft = cardAt(0);
+        var cMid  = cardAt(1);
+        var cRight = cardAt(2);
+        drawCard(cards, sp0, cLeft.x, cLeft.y, st, true, uid);
+        drawCard(cards, n.p, cMid.x, cMid.y, st, false, uid);
+        drawCard(cards, sp1, cRight.x, cRight.y, st, true, uid);
+      } else {
+        var c0 = cardAt(0);
+        drawCard(cards, n.p, c0.x, c0.y, st, false, uid);
+        spousesOf(n).forEach(function (sp, i) {
+          var ci = cardAt(i + 1);
+          drawCard(cards, sp, ci.x, ci.y, st, true, uid);
+        });
+      }
       if (n.children.length > 0 && !depthLimited(n)) {
         var bx = mainX(n);
         var by = n.y + ch + 13;

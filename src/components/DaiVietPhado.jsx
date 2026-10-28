@@ -57,37 +57,37 @@ export default function DaiVietPhado({
         parentId = null;
         fid = null;
         mid = null;
-        spIds = []; // 2 Cụ Bà đứng thành 2 nhánh con trực tiếp dưới Cụ Tổ để toả xuống các con
+        spIds = [77082, 77083]; // 2 Cụ Bà đứng ngang hàng cùng Cụ Thuỷ Tổ
       } else if (isBaCa) {
-        // Bà Cả Nguyễn Thị Hơn: Nối trực tiếp từ Cụ Thuỷ Tổ, đứng nhánh bên trái
-        isFamily = true;
-        parentId = 77081;
-        fid = 77081;
+        // Bà Cả Nguyễn Thị Hơn: Đứng ngang hàng cùng Cụ Thuỷ Tổ (vợ cả)
+        isFamily = false;
+        parentId = null;
+        fid = null;
         mid = null;
-        spIds = [];
+        spIds = [77081];
         orderSort = 1;
       } else if (isBaHai) {
-        // Bà Hai Nguyễn Thị Trình: Nối trực tiếp từ Cụ Thuỷ Tổ, đứng nhánh bên phải
-        isFamily = true;
-        parentId = 77081;
-        fid = 77081;
+        // Bà Hai Nguyễn Thị Trình: Đứng ngang hàng cùng Cụ Thuỷ Tổ (vợ hai)
+        isFamily = false;
+        parentId = null;
+        fid = null;
         mid = null;
-        spIds = [];
+        spIds = [77081];
         orderSort = 2;
       } else if (isBaCaChild) {
-        // 4 người con do Bà Cả sinh ra: Nối trực tiếp từ Bà Cả xuống!
+        // 4 người con do Bà Cả sinh ra: Nối về Cụ Thuỷ Tổ & Mẹ là Bà Cả (Đời 2)
         isFamily = true;
-        parentId = 77082;
+        parentId = 77081;
         fid = 77081;
         mid = 77082;
         orderSort = baCaChildIds.indexOf(pid) + 1;
       } else if (isBaHaiChild) {
-        // 3 người con do Bà Hai sinh ra: Nối trực tiếp từ Bà Hai xuống!
+        // 3 người con do Bà Hai sinh ra: Nối về Cụ Thuỷ Tổ & Mẹ là Bà Hai (Đời 2)
         isFamily = true;
-        parentId = 77083;
+        parentId = 77081;
         fid = 77081;
         mid = 77083;
-        orderSort = baHaiChildIds.indexOf(pid) + 1;
+        orderSort = 4 + baHaiChildIds.indexOf(pid) + 1;
       } else {
         const hasParent = !!(m.fatherId || m.motherId);
         isFamily = isRoot || hasParent;
