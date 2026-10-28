@@ -174,6 +174,17 @@
     var cl = left + (n.w - total) / 2;
     var childY = y + nodeCardH(n) + GAP_Y;
     n.children.forEach(function (c) { place(c, cl, depth + 1, childY); cl += c.w + GAP_X; });
+
+    // Căn 2 Cụ Bà Tổ đứng gần nhau ở trung tâm dưới Cụ Thuỷ Tổ thay vì dạt ra 2 biên
+    if (n.p && n.p.personId === 77081 && n.children.length === 2) {
+      var baCaNode = n.children[0];
+      var baHaiNode = n.children[1];
+      var centerX = mainX(n);
+      var rootW = ROOT_CARD_W; // 208
+      var halfGap = 20;
+      baCaNode.x = centerX - rootW / 2 - halfGap;
+      baHaiNode.x = centerX + rootW / 2 + halfGap;
+    }
   }
 
   function layout(model) {
@@ -776,9 +787,9 @@
     var k = Math.min(1, w / b.w, h / b.h);
     if (k < 0.55 && st.model && st.model.roots && st.model.roots.length > 0) {
       var r = st.model.roots[0];
-      k = 0.85;
+      k = Math.max(0.35, Math.min(0.65, w / 2500));
       var tx = w / 2 - mainX(r) * k;
-      var ty = 50 - r.y * k;
+      var ty = 40 - r.y * k;
       var t = d3.zoomIdentity.translate(tx, ty).scale(k);
       var sel = d3.select(st.svg);
       if (animate) sel.transition().duration(350).call(st.zoom.transform, t); else sel.call(st.zoom.transform, t);

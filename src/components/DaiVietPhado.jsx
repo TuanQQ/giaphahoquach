@@ -161,7 +161,7 @@ export default function DaiVietPhado({
 
     window.phadoAdmin.render(containerId, { people: filteredPeople }, dotNetBridge, {
       cardStyle: 'default',
-      expandAll: false,
+      expandAll: true,
       isAdmin: isAdmin
     });
 
